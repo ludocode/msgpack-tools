@@ -1,0 +1,62 @@
+[
+    /* This is a comment. */
+    {
+        /* comment */"name"/*comment*/: /* comment */ "Alice"/**/, /*
+        */
+        "age": 24,
+        "height": 65,
+        "favorite_foods": [
+            "apples",
+            "avocados",
+        /**/]/**/,/* messy trailing comma */
+    },
+
+    // This is a comment.
+    {
+        //
+        "name"//
+        //
+        ://
+        "Bob"//
+        //
+        ,//
+        //
+        "age": 31,                                                        
+        "height": 72,              // lots of trailing whitespace ->      
+        "favorite_foods": [                                               
+            "banana bread",
+            "beets"          // no trailing
+        ]                    // commas
+    },
+
+	/*
+	 * This is a
+	 * multiline
+	 * comment.
+	 */
+	{
+		"name": "Carl",
+		// <- these are tabs
+		"age": 21,
+		"height": 70,
+		"favorite_foods": [
+			"carrot cake",
+			"cucumbers",
+		],
+	},
+
+    // This is a
+    // multiline
+    // comment.
+    {
+        "name": "Donna", 
+        // these are carriage returns -> 
+        /* carriage returns in a comment:  */  /* <- and outside of one */
+        "age": 44,
+        "height": 62,
+        "favorite_foods": [
+            "dill pickles",
+            "deviled eggs",  // trailing
+        ],                   // commas
+    },
+]

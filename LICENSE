@@ -20,3 +20,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+------------------------------------------------------------------------
+
+The msgpack2json redistributable package includes packaged code from the
+following open source libraries:
+
+MPack  - https://github.com/ludocode/mpack
+YAJL   - http://lloyd.github.io/yajl/
+libb64 - http://libb64.sourceforge.net/
+
+These libraries are covered by their respective licenses included in
+their packages.

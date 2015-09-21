@@ -1,0 +1,7 @@
+{
+    "string": "The quick brown fox jumps over the lazy dog",
+    "md5": <bin of size 16>,
+    "sha512": <bin of size 64>,
+    "ext 127 md5": <ext of type 127 size 16>,
+    "ext -128 sha512": <ext of type -128 size 64>
+}

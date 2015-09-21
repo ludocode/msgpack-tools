@@ -1,0 +1,38 @@
+[
+    {
+        "name": "Alice",
+        "age": 24,
+        "height": 65,
+        "favorite_foods": [
+            "apples",
+            "avocados"
+        ]
+    },
+    {
+        "name": "Bob",
+        "age": 31,
+        "height": 72,
+        "favorite_foods": [
+            "banana bread",
+            "beets"
+        ]
+    },
+    {
+        "name": "Carl",
+        "age": 21,
+        "height": 70,
+        "favorite_foods": [
+            "carrot cake",
+            "cucumbers"
+        ]
+    },
+    {
+        "name": "Donna",
+        "age": 44,
+        "height": 62,
+        "favorite_foods": [
+            "dill pickles",
+            "deviled eggs"
+        ]
+    }
+]
