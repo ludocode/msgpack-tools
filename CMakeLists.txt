@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
+include(GNUInstallDirs)
+
 project(msgpack2json)
 
 set(CONTRIB_DIR ${CMAKE_BINARY_DIR}/contrib)
