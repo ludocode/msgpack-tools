@@ -5,6 +5,12 @@
 
 They can be used for dumping MessagePack from a file or web API to a human-readable format, or for converting hand-written or generated JSON to MessagePack.
 
+## Build Status
+
+| [Travis-CI](https://travis-ci.org/) |
+| :-------: |
+| [![Build Status](https://travis-ci.org/ludocode/msgpack2json.svg?branch=develop)](https://travis-ci.org/ludocode/msgpack2json/branches) |
+
 ## Examples
 
 To view a MessagePack file in a human-readable format for debugging purposes:

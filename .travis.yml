@@ -1,0 +1,17 @@
+language: c
+
+addons:
+  apt:
+    packages:
+      - clang
+
+script: tools/ci.sh
+
+compiler:
+  - clang
+  - gcc
+  - scan-build
+
+env:
+  - DEBUG=1
+  - RELEASE=1
