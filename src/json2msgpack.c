@@ -378,14 +378,14 @@ static void usage(const char* command) {
 }
 
 static void version(const char* command) {
-    fprintf(stderr, "%s version %s\n", command, VERSION);
+    fprintf(stderr, "%s version %s -- %s\n", command, VERSION, "https://github.com/ludocode/msgpack2json");
 
     static char buf[16];
     snprintf(buf, sizeof(buf), "%u.%u.%u", YAJL_MAJOR, YAJL_MINOR, YAJL_MICRO);
-    fprintf(stderr, "YAJL version %s\n", buf);
+    fprintf(stderr, "YAJL version %s -- %s\n", buf, "http://lloyd.github.io/yajl/");
 
-    fprintf(stderr, "MPack version %s\n", MPACK_VERSION_STRING);
-    fprintf(stderr, "libb64 version %s\n", "1.2.1");
+    fprintf(stderr, "MPack version %s -- %s\n", MPACK_VERSION_STRING, "https://github.com/ludocode/mpack");
+    fprintf(stderr, "libb64 version %s -- %s\n", "1.2.1", "http://libb64.sourceforge.net/");
 }
 
 int main(int argc, char** argv) {
