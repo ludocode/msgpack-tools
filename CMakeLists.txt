@@ -29,7 +29,7 @@ endif()
 
 # mpack
 
-set(MPACK_VERSION "0.5.1")
+set(MPACK_VERSION "0.7")
 set(MPACK_FILE "mpack-amalgamation-${MPACK_VERSION}.tar.gz")
 set(MPACK_DIR "${CONTRIB_DIR}/mpack-amalgamation-${MPACK_VERSION}")
 

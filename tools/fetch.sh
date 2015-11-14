@@ -4,7 +4,7 @@ mkdir -p contrib
 pushd contrib
 
 # fetch mpack
-MPACK_VERSION="0.5.1"
+MPACK_VERSION="0.7"
 MPACK_FILE="mpack-amalgamation-${MPACK_VERSION}.tar.gz"
 MPACK_URL="https://github.com/ludocode/mpack/releases/download/v${MPACK_VERSION}/${MPACK_FILE}"
 curl -L -o "${MPACK_FILE}" "${MPACK_URL}" || exit $?
