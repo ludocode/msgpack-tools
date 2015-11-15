@@ -22,8 +22,8 @@ if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
 else()
     set(FLAGS "-std=c99 -Wall -Wextra")
     set(CMAKE_C_FLAGS_DEBUG   "${FLAGS} -g -O0 -DDEBUG")
-    set(CMAKE_C_FLAGS_RELEASE "${FLAGS} -O3 -flto -DNDEBUG -fPIC -DPIC")
-    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fwhole-program -s")
+    set(CMAKE_C_FLAGS_RELEASE "${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 endif()
 
 
