@@ -4,6 +4,7 @@ addons:
   apt:
     packages:
       - clang
+      - valgrind
 
 script: tools/ci.sh
 
