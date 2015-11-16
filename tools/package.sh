@@ -1,7 +1,7 @@
 #!/bin/bash
 # TODO put version in CMake
-VERSION=0.1
-NAME=msgpack2json-${VERSION}
+VERSION=0.2
+NAME=msgpack-tools-${VERSION}
 FILES="\
     README.md \
     LICENSE \
@@ -12,9 +12,7 @@ FILES="\
     contrib/*.zip \
     docs \
     docs/json2msgpack.1 \
-    docs/json2msgpack.md \
     docs/msgpack2json.1 \
-    docs/msgpack2json.md \
     src \
     src/json2msgpack.c \
     src/msgpack2json.c \
@@ -36,7 +34,8 @@ FILES="\
     tests/basic.mp \
     tools \
     tools/debug.sh \
-    tools/man.sh \
+    tools/valgrind.sh \
+    tools/valgrind-suppressions \
     tools/test-compare.sh \
     tools/test-fail.sh \
     "
