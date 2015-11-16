@@ -80,7 +80,7 @@ SEE ALSO
 
 msgpack2json(1)
 
-[msgpack2json](https://github.com/ludocode/msgpack2json)
+[msgpack-tools](https://github.com/ludocode/msgpack-tools)
 
 [JSON](http://json.org/)
 
