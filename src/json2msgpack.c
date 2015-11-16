@@ -33,7 +33,7 @@
 #include "yajl/yajl_tree.h"
 #include "yajl/yajl_version.h"
 
-#define VERSION "0.1"
+#define VERSION "0.2"
 
 typedef struct options_t {
     const char* command;
