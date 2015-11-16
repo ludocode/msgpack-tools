@@ -33,6 +33,10 @@ set(MPACK_VERSION "0.7")
 set(MPACK_FILE "mpack-amalgamation-${MPACK_VERSION}.tar.gz")
 set(MPACK_DIR "${CONTRIB_DIR}/mpack-amalgamation-${MPACK_VERSION}")
 
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}")
+    message(FATAL_ERROR "\nMPack source is missing: contrib/${MPACK_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
+endif()
+
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE} WORKING_DIRECTORY ${CONTRIB_DIR})
 
 file(COPY ${MPACK_DIR}/src/mpack-config.h.sample DESTINATION ${CMAKE_BINARY_DIR})
@@ -49,6 +53,10 @@ set(YAJL_VERSION "2.1.1")
 set(YAJL_FILE "yajl-${YAJL_COMMIT}.tar.gz")
 set(YAJL_DIR "${CONTRIB_DIR}/yajl-${YAJL_COMMIT}")
 
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${YAJL_FILE}")
+    message(FATAL_ERROR "\nYAJL source is missing: contrib/${YAJL_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
+endif()
+
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_SOURCE_DIR}/contrib/${YAJL_FILE}" WORKING_DIRECTORY "${CONTRIB_DIR}")
 
 execute_process(COMMAND ./configure WORKING_DIRECTORY ${YAJL_DIR})
@@ -62,6 +70,10 @@ include_directories(SYSTEM ${YAJL_DIR}/build/yajl-${YAJL_VERSION}/include)
 set(LIBB64_VERSION "1.2.1")
 set(LIBB64_FILE "libb64-${LIBB64_VERSION}.zip")
 set(LIBB64_DIR "${CONTRIB_DIR}/libb64-${LIBB64_VERSION}")
+
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}")
+    message(FATAL_ERROR "\nlibb64 source is missing: contrib/${LIBB64_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
+endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar xf "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}" WORKING_DIRECTORY "${CONTRIB_DIR}")
 
@@ -84,6 +96,13 @@ install(TARGETS msgpack2json json2msgpack DESTINATION bin)
 
 install(FILES ${CMAKE_SOURCE_DIR}/docs/msgpack2json.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1)
 install(FILES ${CMAKE_SOURCE_DIR}/docs/json2msgpack.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1)
+
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/docs/msgpack2json.1")
+    message(FATAL_ERROR "\nmsgpack2json man page is missing: docs/msgpack2json.1\nTo build from the repository, you need to generate manpages with tools/man.sh")
+endif()
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/docs/json2msgpack.1")
+    message(FATAL_ERROR "\njson2msgpack man page is missing: docs/json2msgpack.1\nTo build from the repository, you need to generate manpages with tools/man.sh")
+endif()
 
 
 # testing
