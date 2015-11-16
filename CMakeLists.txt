@@ -44,7 +44,7 @@ include_directories(SYSTEM ${CMAKE_BINARY_DIR} ${MPACK_DIR}/src)
 
 # yajl
 
-set(YAJL_COMMIT "78764146789a0aa263f2c10316cab1b651166cd7")
+set(YAJL_COMMIT "2c42d2a07e68bfdfb1d16c0ed7efd31f327aae49")
 set(YAJL_VERSION "2.1.1")
 set(YAJL_FILE "yajl-${YAJL_COMMIT}.tar.gz")
 set(YAJL_DIR "${CONTRIB_DIR}/yajl-${YAJL_COMMIT}")

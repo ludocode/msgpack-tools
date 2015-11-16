@@ -10,9 +10,10 @@ MPACK_URL="https://github.com/ludocode/mpack/releases/download/v${MPACK_VERSION}
 curl -L -o "${MPACK_FILE}" "${MPACK_URL}" || exit $?
 
 # fetch yajl
-# (we use our fork of yajl that adds lots of lax parsing and generation options)
+# (we use our fork of yajl that fixes bugs and adds lax
+# parsing and generation options)
 # https://github.com/ludocode/yajl
-YAJL_COMMIT="78764146789a0aa263f2c10316cab1b651166cd7"
+YAJL_COMMIT="2c42d2a07e68bfdfb1d16c0ed7efd31f327aae49"
 YAJL_FILE="yajl-${YAJL_COMMIT}.tar.gz"
 YAJL_URL="https://github.com/ludocode/yajl/archive/${YAJL_COMMIT}.tar.gz"
 curl -L -o "${YAJL_FILE}" "${YAJL_URL}" || exit $?
