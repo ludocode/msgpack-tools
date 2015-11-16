@@ -9,6 +9,7 @@ else
 fi
 
 tools/fetch.sh || exit $?
+tools/man.sh || exit $?
 
 mkdir -p build
 cd build

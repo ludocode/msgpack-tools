@@ -1,5 +1,8 @@
 language: c
 
+before_install:
+  - gem install md2man
+
 addons:
   apt:
     packages:
