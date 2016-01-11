@@ -77,6 +77,11 @@ To fetch MessagePack from a web API and view it in a human-readable format:
 
 > `curl` *ht**tp://example/url* `| msgpack2json -d`
 
+BUGS
+----
+
+`msgpack2json` currently truncates strings that contain NUL bytes.
+
 AUTHOR
 ------
 

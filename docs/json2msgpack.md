@@ -70,6 +70,11 @@ To convert a hand-written JSON file to a MessagePack file, ignoring comments and
 
 > `json2msgpack -bli` *file.json* `-o` *file.mp*
 
+BUGS
+----
+
+`json2msgpack` currently truncates strings that contain NUL characters (both NUL bytes and the "`\u0000`" JSON escape sequence.)
+
 AUTHOR
 ------
 
