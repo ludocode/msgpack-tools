@@ -9,6 +9,14 @@ MPACK_FILE="mpack-amalgamation-${MPACK_VERSION}.tar.gz"
 MPACK_URL="https://github.com/ludocode/mpack/releases/download/v${MPACK_VERSION}/${MPACK_FILE}"
 curl -L -o "${MPACK_FILE}" "${MPACK_URL}" || exit $?
 
+# fetch rapidjson
+# (temporarily using our fork of rapidjson for trailing comma support)
+# https://github.com/ludocode/rapidjson
+RAPIDJSON_COMMIT="9fce30c06648519f3d44a2599ae91015f4dc311c"
+RAPIDJSON_FILE="rapidjson-${RAPIDJSON_COMMIT}.tar.gz"
+RAPIDJSON_URL="https://github.com/ludocode/rapidjson/archive/${RAPIDJSON_COMMIT}.tar.gz"
+curl -L -o "${RAPIDJSON_FILE}" "${RAPIDJSON_URL}" || exit $?
+
 # fetch yajl
 # (we use our fork of yajl that fixes bugs and adds lax
 # parsing and generation options)

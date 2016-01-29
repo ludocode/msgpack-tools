@@ -46,6 +46,21 @@ file(GLOB_RECURSE MPACK_SRCS ${MPACK_DIR}/src/*.c)
 include_directories(SYSTEM ${CMAKE_BINARY_DIR} ${MPACK_DIR}/src)
 
 
+# rapidjson
+
+set(RAPIDJSON_COMMIT "9fce30c06648519f3d44a2599ae91015f4dc311c")
+set(RAPIDJSON_FILE "rapidjson-${RAPIDJSON_COMMIT}.tar.gz")
+set(RAPIDJSON_DIR "${CONTRIB_DIR}/rapidjson-${RAPIDJSON_VERSION}")
+
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE}")
+    message(FATAL_ERROR "\nRapidJSON source is missing: contrib/${RAPIDJSON_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
+endif()
+
+execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE} WORKING_DIRECTORY ${CONTRIB_DIR})
+
+include_directories(SYSTEM ${RAPIDJSON_DIR}/include)
+
+
 # yajl
 
 set(YAJL_COMMIT "2c42d2a07e68bfdfb1d16c0ed7efd31f327aae49")
