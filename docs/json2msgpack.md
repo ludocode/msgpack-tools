@@ -32,7 +32,6 @@ OPTIONS
 
 - Comments are allowed and ignored
 - Trailing commas in maps and arrays are allowed and ignored
-- Single quotes can be used instead of double quotes to delimit strings
 
 `-f`
   Convert real numbers to floats instead of doubles.
@@ -59,8 +58,6 @@ OPTIONS
 NOTES
 -----
 
-Integers outside of the range \[INT64\_MIN, UINT64\_MAX\] will generate an error, since they cannot be stored in MessagePack.
-
 `json2msgpack` will preserve the ordering of key-value pairs in objects/maps, and does not check that keys are unique.
 
 EXAMPLES
@@ -73,7 +70,7 @@ To convert a hand-written JSON file to a MessagePack file, ignoring comments and
 BUGS
 ----
 
-`json2msgpack` currently truncates strings that contain NUL characters (both NUL bytes and the "`\u0000`" JSON escape sequence.)
+Big integers outside of the range \[INT64\_MIN, UINT64\_MAX\] are converted to real numbers instead of causing a parse error. They will be output in MessagePack as doubles, or floats if `-f` was specified, with associated loss of precision.
 
 AUTHOR
 ------

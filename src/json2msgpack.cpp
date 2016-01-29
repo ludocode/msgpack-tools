@@ -33,8 +33,10 @@ extern "C" {
 }
 
 #include "mpack/mpack.h"
-#include "yajl/yajl_tree.h"
-#include "yajl/yajl_version.h"
+#include "rapidjson/document.h"
+#include "rapidjson/error/en.h"
+
+using namespace rapidjson;
 
 #define VERSION "0.2"
 
@@ -85,8 +87,7 @@ static char* convert_base64(options_t* options, const char* p, size_t len, size_
     return data;
 }
 
-static bool write_string(options_t* options, mpack_writer_t* writer, const char* string, bool allow_detection) {
-    size_t length = strlen(string);
+static bool write_string(options_t* options, mpack_writer_t* writer, const char* string, size_t length, bool allow_detection) {
 
     if (options->base64_prefix) {
 
@@ -167,59 +168,48 @@ static bool write_string(options_t* options, mpack_writer_t* writer, const char*
     return mpack_writer_error(writer) == mpack_ok;
 }
 
-static bool write_node(options_t* options, yajl_val node, mpack_writer_t* writer) {
-    switch (node->type) {
-        case yajl_t_null:   mpack_write_nil(writer);    break;
-        case yajl_t_true:   mpack_write_true(writer);   break;
-        case yajl_t_false:  mpack_write_false(writer);  break;
+static bool write_value(options_t* options, Value& value, mpack_writer_t* writer) {
+    switch (value.GetType()) {
+        case kNullType:   mpack_write_nil(writer);    break;
+        case kTrueType:   mpack_write_true(writer);   break;
+        case kFalseType:  mpack_write_false(writer);  break;
 
-        case yajl_t_number:
-            if (YAJL_IS_INTEGER(node)) {
-                mpack_write_i64(writer, YAJL_GET_INTEGER(node));
-            } else if (YAJL_IS_DOUBLE(node)) {
+        case kNumberType:
+            if (value.IsDouble()) {
                 if (options->use_float)
-                    mpack_write_float(writer, (float)YAJL_GET_DOUBLE(node));
+                    mpack_write_float(writer, (float)value.GetDouble());
                 else
-                    mpack_write_double(writer, YAJL_GET_DOUBLE(node));
+                    mpack_write_double(writer, value.GetDouble());
+            } else if (value.IsUint64()) {
+                mpack_write_u64(writer, value.GetUint64());
             } else {
-                const char* str = YAJL_GET_NUMBER(node);
-                char* end;
-                errno = 0;
-                uint64_t val = strtoull(str, &end, 10);
-                if (errno != 0 || *end != '\0' || val == 0) {
-                    fprintf(stderr, "%s: JSON number cannot be encoded in MessagePack: \"%s\"\n",
-                            options->command, str);
-                    return false;
-                }
-                mpack_write_u64(writer, val);
+                mpack_write_i64(writer, value.GetInt64());
             }
             break;
 
-        case yajl_t_string:
-            if (!write_string(options, writer, YAJL_GET_STRING(node), true))
+        case kStringType:
+            if (!write_string(options, writer, value.GetString(), value.GetStringLength(), true))
                 return false;
             break;
 
-        case yajl_t_array: {
-            size_t count = YAJL_GET_ARRAY(node)->len;
-            mpack_start_array(writer, count);
-            for (size_t i = 0; i < count; ++i) {
-                write_node(options, YAJL_GET_ARRAY(node)->values[i], writer);
-                if (mpack_writer_error(writer) != mpack_ok)
+        case kArrayType: {
+            mpack_start_array(writer, value.Size());
+            auto it = value.Begin(), end = value.End();
+            for (; it != end; ++it) {
+                if (!write_value(options, *it, writer))
                     return false;
             }
             mpack_finish_array(writer);
             break;
         }
 
-        case yajl_t_object: {
-            size_t count = YAJL_GET_OBJECT(node)->len;
-            mpack_start_map(writer, count);
-            for (uint32_t i = 0; i < count; ++i) {
-                if (!write_string(options, writer, YAJL_GET_OBJECT(node)->keys[i], false))
+        case kObjectType: {
+            mpack_start_map(writer, value.MemberCount());
+            auto it = value.MemberBegin(), end = value.MemberEnd();
+            for (; it != end; ++it) {
+                if (!write_string(options, writer, it->name.GetString(), it->name.GetStringLength(), false))
                     return false;
-                write_node(options, YAJL_GET_OBJECT(node)->values[i], writer);
-                if (mpack_writer_error(writer) != mpack_ok)
+                if (!write_value(options, it->value, writer))
                     return false;
             }
             mpack_finish_map(writer);
@@ -233,7 +223,7 @@ static bool write_node(options_t* options, yajl_val node, mpack_writer_t* writer
     return mpack_writer_error(writer) == mpack_ok;
 }
 
-static bool output(options_t* options, yajl_val node) {
+static bool output(options_t* options, Document& document) {
     FILE* out_file;
     if (options->out_filename) {
         out_file = fopen(options->out_filename, "wb");
@@ -250,7 +240,7 @@ static bool output(options_t* options, yajl_val node) {
     mpack_writer_set_context(&writer, out_file);
     mpack_writer_set_flush(&writer, flush);
 
-    write_node(options, node, &writer);
+    write_value(options, document, &writer);
 
     mpack_error_t error = mpack_writer_destroy(&writer);
     if (out_file != stdout)
@@ -277,8 +267,8 @@ static bool load_file(options_t* options, char** out_data, size_t* out_size) {
     while (1) {
         size_t n = fread(data + size, 1, capacity - size, in_file);
 
-        // YAJL parses a null-terminated string, so we need to scan the data
-        // to make sure it has no null bytes. They are not legal JSON anyway.
+        // RapidJSON in-situ requires a null-terminated string, so we need to scan the
+        // data to make sure it has no null bytes. They are not legal JSON anyway.
         for (size_t i = size; i < size + n; ++i) {
             if (data[i] == '\0') {
                 fprintf(stderr, "%s: JSON cannot contain null bytes\n", options->command);
@@ -335,18 +325,20 @@ static bool convert(options_t* options) {
         return false;
 
     // The data has been null-terminated by load_file()
-    char errbuf[1024];
-    yajl_val node = yajl_tree_parse_options(data, errbuf, sizeof(errbuf),
-            options->lax ? yajl_tree_option_allow_trailing_separator : yajl_tree_option_dont_allow_comments);
-    if (node == NULL) {
-        errbuf[sizeof(errbuf)-1] = '\0';
-        fprintf(stderr, "%s: error parsing JSON: %s\n", options->command, errbuf);
+    Document document;
+    if (options->lax)
+        document.ParseInsitu<kParseFullPrecisionFlag | kParseCommentsFlag | kParseTrailingCommasFlag>(data);
+    else
+        document.ParseInsitu<kParseFullPrecisionFlag>(data);
+
+    if (document.HasParseError()) {
+        fprintf(stderr, "%s: error parsing JSON at offset %i:\n    %s\n", options->command,
+                (int)document.GetErrorOffset(), GetParseError_En(document.GetParseError()));
         free(data);
         return false;
     }
 
-    bool error = output(options, node);
-    yajl_tree_free(node);
+    bool error = output(options, document);
     free(data);
     return error;
 }
@@ -382,11 +374,7 @@ static void usage(const char* command) {
 
 static void version(const char* command) {
     fprintf(stderr, "%s version %s -- %s\n", command, VERSION, "https://github.com/ludocode/msgpack2json");
-
-    static char buf[16];
-    snprintf(buf, sizeof(buf), "%u.%u.%u", YAJL_MAJOR, YAJL_MINOR, YAJL_MICRO);
-    fprintf(stderr, "YAJL version %s -- %s\n", buf, "http://lloyd.github.io/yajl/");
-
+    fprintf(stderr, "RapidJSON version %s -- %s\n", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
     fprintf(stderr, "MPack version %s -- %s\n", MPACK_VERSION_STRING, "https://github.com/ludocode/mpack");
     fprintf(stderr, "libb64 version %s -- %s\n", "1.2.1", "http://libb64.sourceforge.net/");
 }

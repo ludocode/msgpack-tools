@@ -20,9 +20,11 @@ if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
     # Windows support is not implemented yet
     add_definitions(/W2)
 else()
-    set(FLAGS "-std=c99 -Wall -Wextra")
-    set(CMAKE_C_FLAGS_DEBUG   "${FLAGS} -g -O0 -DDEBUG")
-    set(CMAKE_C_FLAGS_RELEASE "${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
+    set(FLAGS "-Wall -Wextra")
+    set(CMAKE_C_FLAGS_DEBUG   "-std=c99 ${FLAGS} -g -O0 -DDEBUG")
+    set(CMAKE_C_FLAGS_RELEASE "-std=c99 ${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG   "-std=c++11 ${FLAGS} -g -O0 -DDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 ${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 endif()
 
@@ -50,7 +52,7 @@ include_directories(SYSTEM ${CMAKE_BINARY_DIR} ${MPACK_DIR}/src)
 
 set(RAPIDJSON_COMMIT "9fce30c06648519f3d44a2599ae91015f4dc311c")
 set(RAPIDJSON_FILE "rapidjson-${RAPIDJSON_COMMIT}.tar.gz")
-set(RAPIDJSON_DIR "${CONTRIB_DIR}/rapidjson-${RAPIDJSON_VERSION}")
+set(RAPIDJSON_DIR "${CONTRIB_DIR}/rapidjson-${RAPIDJSON_COMMIT}")
 
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE}")
     message(FATAL_ERROR "\nRapidJSON source is missing: contrib/${RAPIDJSON_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
