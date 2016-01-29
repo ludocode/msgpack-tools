@@ -104,8 +104,8 @@ include_directories(SYSTEM ${LIBB64_DIR}/include)
 
 # targets
 
-add_executable(msgpack2json src/msgpack2json.c ${MPACK_SRCS} ${YAJL_SRCS} ${LIBB64_SRCS})
-add_executable(json2msgpack src/json2msgpack.c ${MPACK_SRCS} ${YAJL_SRCS} ${LIBB64_SRCS})
+add_executable(msgpack2json src/msgpack2json.cpp ${MPACK_SRCS} ${YAJL_SRCS} ${LIBB64_SRCS})
+add_executable(json2msgpack src/json2msgpack.cpp ${MPACK_SRCS} ${YAJL_SRCS} ${LIBB64_SRCS})
 
 install(TARGETS msgpack2json json2msgpack DESTINATION bin)
 

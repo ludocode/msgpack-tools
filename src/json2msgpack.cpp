@@ -28,7 +28,10 @@
 #include <unistd.h>
 #include <errno.h>
 
+extern "C" {
 #include "b64/cdecode.h"
+}
+
 #include "mpack/mpack.h"
 #include "yajl/yajl_tree.h"
 #include "yajl/yajl_version.h"

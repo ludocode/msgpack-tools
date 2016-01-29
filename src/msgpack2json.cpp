@@ -27,7 +27,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
+extern "C" {
 #include "b64/cencode.h"
+}
+
 #include "mpack/mpack.h"
 #include "yajl/yajl_gen.h"
 #include "yajl/yajl_version.h"
