@@ -12,7 +12,7 @@ They can be used for dumping MessagePack from a file or web API to a human-reada
 
 | [Travis-CI](https://travis-ci.org/) |
 | :-------: |
-| [![Build Status](https://travis-ci.org/ludocode/msgpack-tools.svg?branch=develop)](https://travis-ci.org/ludocode/msgpack-tools/branches) |
+| [![Build Status](https://travis-ci.org/ludocode/msgpack-tools.svg?branch=rapidjson)](https://travis-ci.org/ludocode/msgpack-tools/branches) |
 
 ## Examples
 
