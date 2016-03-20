@@ -194,7 +194,7 @@ static bool write_value(options_t* options, Value& value, mpack_writer_t* writer
 
         case kArrayType: {
             mpack_start_array(writer, value.Size());
-            auto it = value.Begin(), end = value.End();
+            Value::ValueIterator it = value.Begin(), end = value.End();
             for (; it != end; ++it) {
                 if (!write_value(options, *it, writer))
                     return false;
@@ -205,7 +205,7 @@ static bool write_value(options_t* options, Value& value, mpack_writer_t* writer
 
         case kObjectType: {
             mpack_start_map(writer, value.MemberCount());
-            auto it = value.MemberBegin(), end = value.MemberEnd();
+            Value::MemberIterator it = value.MemberBegin(), end = value.MemberEnd();
             for (; it != end; ++it) {
                 if (!write_string(options, writer, it->name.GetString(), it->name.GetStringLength(), false))
                     return false;

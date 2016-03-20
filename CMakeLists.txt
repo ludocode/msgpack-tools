@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
 include(GNUInstallDirs)
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
 
 project(msgpack2json)
 
@@ -16,15 +18,29 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
+CHECK_C_COMPILER_FLAG("-std=c11" HAS_C11)
+if(HAS_C11)
+    set(C_FLAGS   "-std=c11")
+else()
+    set(C_FLAGS   "-std=c99")
+endif()
+
+CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CXX11)
+if(HAS_CXX11)
+    set(CXX_FLAGS   "-std=c++11")
+else()
+    set(CXX_FLAGS   "")
+endif()
+
 if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
     # Windows support is not implemented yet
     add_definitions(/W2)
 else()
     set(FLAGS "-Wall -Wextra")
-    set(CMAKE_C_FLAGS_DEBUG   "-std=c99 ${FLAGS} -g -O0 -DDEBUG")
-    set(CMAKE_C_FLAGS_RELEASE "-std=c99 ${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
-    set(CMAKE_CXX_FLAGS_DEBUG   "-std=c++11 ${FLAGS} -g -O0 -DDEBUG")
-    set(CMAKE_CXX_FLAGS_RELEASE "-std=c++11 ${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
+    set(CMAKE_C_FLAGS_DEBUG   "${C_FLAGS} ${FLAGS} -g -O0 -DDEBUG")
+    set(CMAKE_C_FLAGS_RELEASE "${C_FLAGS} ${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG   "${CXX_FLAGS} ${FLAGS} -g -O0 -DDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CXX_FLAGS} ${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 endif()
 
