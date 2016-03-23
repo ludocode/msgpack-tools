@@ -88,8 +88,8 @@ msgpack2json(1)
 
 [MessagePack](http://msgpack.org/)
 
-[MPack](https://github.com/ludocode/mpack)
+[RapidJSON](http://rapidjson.org/)
 
-[YAJL](http://lloyd.github.io/yajl/)
+[MPack](https://github.com/ludocode/mpack)
 
 [libb64](http://libb64.sourceforge.net/)

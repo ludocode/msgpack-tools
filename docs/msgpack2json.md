@@ -100,6 +100,6 @@ json2msgpack(1)
 
 [MPack](https://github.com/ludocode/mpack)
 
-[YAJL](http://lloyd.github.io/yajl/)
+[RapidJSON](http://rapidjson.org/)
 
 [libb64](http://libb64.sourceforge.net/)

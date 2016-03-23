@@ -79,25 +79,6 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/contrib/
 include_directories(SYSTEM ${RAPIDJSON_DIR}/include)
 
 
-# yajl
-
-set(YAJL_COMMIT "2c42d2a07e68bfdfb1d16c0ed7efd31f327aae49")
-set(YAJL_VERSION "2.1.1")
-set(YAJL_FILE "yajl-${YAJL_COMMIT}.tar.gz")
-set(YAJL_DIR "${CONTRIB_DIR}/yajl-${YAJL_COMMIT}")
-
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${YAJL_FILE}")
-    message(FATAL_ERROR "\nYAJL source is missing: contrib/${YAJL_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
-endif()
-
-execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_SOURCE_DIR}/contrib/${YAJL_FILE}" WORKING_DIRECTORY "${CONTRIB_DIR}")
-
-execute_process(COMMAND ./configure WORKING_DIRECTORY ${YAJL_DIR})
-
-file(GLOB_RECURSE YAJL_SRCS ${YAJL_DIR}/src/*.c)
-include_directories(SYSTEM ${YAJL_DIR}/build/yajl-${YAJL_VERSION}/include)
-
-
 # libb64
 
 set(LIBB64_VERSION "1.2.1")
@@ -122,8 +103,8 @@ include_directories(SYSTEM ${LIBB64_DIR}/include)
 
 # targets
 
-add_executable(msgpack2json src/msgpack2json.cpp ${MPACK_SRCS} ${YAJL_SRCS} ${LIBB64_SRCS})
-add_executable(json2msgpack src/json2msgpack.cpp ${MPACK_SRCS} ${YAJL_SRCS} ${LIBB64_SRCS})
+add_executable(msgpack2json src/msgpack2json.cpp ${MPACK_SRCS} ${LIBB64_SRCS})
+add_executable(json2msgpack src/json2msgpack.cpp ${MPACK_SRCS} ${LIBB64_SRCS})
 
 install(TARGETS msgpack2json json2msgpack DESTINATION bin)
 

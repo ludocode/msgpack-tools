@@ -15,15 +15,6 @@ RAPIDJSON_FILE="rapidjson-${RAPIDJSON_COMMIT}.tar.gz"
 RAPIDJSON_URL="https://github.com/miloyip/rapidjson/archive/${RAPIDJSON_COMMIT}.tar.gz"
 curl -L -o "${RAPIDJSON_FILE}" "${RAPIDJSON_URL}" || exit $?
 
-# fetch yajl
-# (we use our fork of yajl that fixes bugs and adds lax
-# parsing and generation options)
-# https://github.com/ludocode/yajl
-YAJL_COMMIT="2c42d2a07e68bfdfb1d16c0ed7efd31f327aae49"
-YAJL_FILE="yajl-${YAJL_COMMIT}.tar.gz"
-YAJL_URL="https://github.com/ludocode/yajl/archive/${YAJL_COMMIT}.tar.gz"
-curl -L -o "${YAJL_FILE}" "${YAJL_URL}" || exit $?
-
 # fetch libb64
 LIBB64_VERSION="1.2.1"
 LIBB64_FILE="libb64-${LIBB64_VERSION}.zip"
