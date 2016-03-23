@@ -24,6 +24,12 @@
 
 #define _XOPEN_SOURCE
 
+// The code that checks that object keys are strings just uses
+// RAPIDJSON_ASSERT(). We define it to nothing to disable this
+// so we can write non-string keys in debug mode. (We actually
+// never call Key(), and always write whatever type we want.)
+#define RAPIDJSON_ASSERT(x) ((void)(x))
+
 #include <stdio.h>
 #include <unistd.h>
 
@@ -32,8 +38,12 @@ extern "C" {
 }
 
 #include "mpack/mpack.h"
-#include "yajl/yajl_gen.h"
-#include "yajl/yajl_version.h"
+#include "rapidjson/error/en.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/writer.h"
+
+using namespace rapidjson;
 
 #define VERSION "0.2"
 
@@ -51,25 +61,21 @@ static size_t fill(mpack_reader_t* reader, char* buffer, size_t count) {
     return fread((void*)buffer, 1, count, (FILE*)reader->context);
 }
 
-static bool skip_quotes = false;
-static FILE* out_file = NULL;
-
-static void* print(void* ctx, const char* str, unsigned int len) {
-
-    // This is used to ignore the output of quotes in order to print
-    // our <bin> and <ext> types in debug mode.
-    if (skip_quotes && len == 1 && str[0] == '"')
-        return NULL;
-
-    fwrite(str, 1, len, (FILE*)ctx);
-    // TODO error
-    return NULL;
-}
-
 // Reads MessagePack string bytes and outputs a JSON string
-static bool string(mpack_reader_t* reader, yajl_gen gen, options_t* options, uint32_t len) {
-    char* str = (char*)malloc(len);
+template <class WriterType>
+static bool string(mpack_reader_t* reader, WriterType& writer, options_t* options, uint32_t len) {
+    if (mpack_should_read_bytes_inplace(reader, len)) {
+        const char* str = mpack_read_bytes_inplace(reader, len);
+        if (mpack_reader_error(reader) != mpack_ok) {
+            fprintf(stderr, "%s: error reading string bytes\n", options->command);
+            return false;
+        }
+        bool ok = writer.String(str, len);
+        mpack_done_str(reader);
+        return ok;
+    }
 
+    char* str = (char*)malloc(len);
     mpack_read_bytes(reader, str, len);
     if (mpack_reader_error(reader) != mpack_ok) {
         fprintf(stderr, "%s: error reading string bytes\n", options->command);
@@ -78,9 +84,9 @@ static bool string(mpack_reader_t* reader, yajl_gen gen, options_t* options, uin
     }
     mpack_done_str(reader);
 
-    yajl_gen_status status = yajl_gen_string(gen, (const unsigned char*)str, len);
+    bool ok = writer.String(str, len);
     free(str);
-    return status == yajl_gen_status_ok;
+    return ok;
 }
 
 static const char* ext_str = "ext:";
@@ -91,7 +97,8 @@ static uint32_t base64_len(uint32_t len) {
 }
 
 // Converts MessagePack bin/ext bytes to JSON base64 string
-static bool base64(mpack_reader_t* reader, yajl_gen gen, options_t* options, uint32_t len, char* output, char* p, bool prefix) {
+template <class WriterType>
+static bool base64(mpack_reader_t* reader, WriterType& writer, options_t* options, uint32_t len, char* output, char* p, bool prefix) {
     if (prefix) {
         memcpy(p, b64_str, strlen(b64_str));
         p += strlen(b64_str);
@@ -113,16 +120,16 @@ static bool base64(mpack_reader_t* reader, yajl_gen gen, options_t* options, uin
     }
     p += base64_encode_blockend(p, &state);
 
-    bool ret = yajl_gen_string(gen, (const unsigned char*)output, p - output) == yajl_gen_status_ok;
-    return ret;
+    return writer.String(output, p - output);
 }
 
 // Reads MessagePack bin bytes and outputs a JSON base64 string
-static bool base64_bin(mpack_reader_t* reader, yajl_gen gen, options_t* options, uint32_t len, bool prefix) {
+template <class WriterType>
+static bool base64_bin(mpack_reader_t* reader, WriterType& writer, options_t* options, uint32_t len, bool prefix) {
     uint32_t new_len = base64_len(len) + (prefix ? strlen(b64_str) : 0);
     char* output = (char*)malloc(new_len);
 
-    bool ret = base64(reader, gen, options, len, output, output, prefix);
+    bool ret = base64(reader, writer, options, len, output, output, prefix);
 
     mpack_done_bin(reader);
     free(output);
@@ -130,7 +137,8 @@ static bool base64_bin(mpack_reader_t* reader, yajl_gen gen, options_t* options,
 }
 
 // Reads MessagePack ext bytes and outputs a JSON base64 string
-static bool base64_ext(mpack_reader_t* reader, yajl_gen gen, options_t* options, int8_t exttype, uint32_t len) {
+template <class WriterType>
+static bool base64_ext(mpack_reader_t* reader, WriterType& writer, options_t* options, int8_t exttype, uint32_t len) {
     uint32_t new_len = base64_len(len) + strlen(ext_str) + 5 + strlen(b64_str);
     char* output = (char*)malloc(new_len);
 
@@ -141,14 +149,15 @@ static bool base64_ext(mpack_reader_t* reader, yajl_gen gen, options_t* options,
     p += strlen(p);
     *p++ = ':';
 
-    bool ret = base64(reader, gen, options, len, output, p, true);
+    bool ret = base64(reader, writer, options, len, output, p, true);
 
     mpack_done_ext(reader);
     free(output);
     return ret;
 }
 
-static bool element(mpack_reader_t* reader, yajl_gen gen, options_t* options, int depth) {
+template <class WriterType>
+static bool element(mpack_reader_t* reader, WriterType& writer, options_t* options, int depth) {
     const mpack_tag_t tag = mpack_read_tag(reader);
     if (mpack_reader_error(reader) != mpack_ok)
         return false;
@@ -160,40 +169,25 @@ static bool element(mpack_reader_t* reader, yajl_gen gen, options_t* options, in
 
     // TODO check not depth zero
     switch (tag.type) {
-        case mpack_type_bool:   return yajl_gen_bool(gen, tag.v.b) == yajl_gen_status_ok;
-        case mpack_type_nil:    return yajl_gen_null(gen) == yajl_gen_status_ok;
-        case mpack_type_int:    return yajl_gen_integer(gen, tag.v.i) == yajl_gen_status_ok;
-        case mpack_type_float:  return yajl_gen_double(gen, tag.v.f) == yajl_gen_status_ok;
-        case mpack_type_double: return yajl_gen_double(gen, tag.v.d) == yajl_gen_status_ok;
-
-        case mpack_type_uint:
-            if (tag.v.u > (uint64_t)INT64_MAX) {
-                char buf[32];
-                snprintf(buf, sizeof(buf), "%" PRIu64, tag.v.u);
-                return yajl_gen_string(gen, (const unsigned char*)buf, strlen(buf)) == yajl_gen_status_ok;
-            }
-            return yajl_gen_integer(gen, (int64_t)tag.v.u) == yajl_gen_status_ok;
+        case mpack_type_bool:   return writer.Bool(tag.v.b);
+        case mpack_type_nil:    return writer.Null();
+        case mpack_type_int:    return writer.Int64(tag.v.i);
+        case mpack_type_uint:   return writer.Uint64(tag.v.u);
+        case mpack_type_float:  return writer.Double((double)tag.v.f);
+        case mpack_type_double: return writer.Double(tag.v.d);
 
         case mpack_type_str:
-            return string(reader, gen, options, tag.v.l);
+            return string(reader, writer, options, tag.v.l);
 
         case mpack_type_bin:
             if (options->base64) {
-                return base64_bin(reader, gen, options, tag.v.l, options->base64_prefix);
+                return base64_bin(reader, writer, options, tag.v.l, options->base64_prefix);
             } else if (options->debug) {
                 mpack_skip_bytes(reader, tag.v.l);
                 mpack_done_bin(reader);
-
-                // output nothing to allow us to print our debug string
-                skip_quotes = true;
-                if (yajl_gen_string(gen, (const unsigned char*)"", 0) != yajl_gen_status_ok)
-                    return false;
-                skip_quotes = false;
-
                 char buf[64];
                 snprintf(buf, sizeof(buf), "<bin of size %u>", tag.v.l);
-                print(out_file, buf, strlen(buf));
-                return true;
+                return writer.RawValue(buf, strlen(buf), kStringType);
             } else {
                 fprintf(stderr, "%s: bin unencodable in JSON. Try debug viewing mode (-d)\n", options->command);
                 return false;
@@ -201,57 +195,49 @@ static bool element(mpack_reader_t* reader, yajl_gen gen, options_t* options, in
 
         case mpack_type_ext:
             if (options->base64) {
-                return base64_ext(reader, gen, options, tag.exttype, tag.v.l);
+                return base64_ext(reader, writer, options, tag.exttype, tag.v.l);
             } else if (options->debug) {
                 mpack_skip_bytes(reader, tag.v.l);
                 mpack_done_ext(reader);
-
-                // output nothing to allow us to print our debug string
-                skip_quotes = true;
-                if (yajl_gen_string(gen, (const unsigned char*)"", 0) != yajl_gen_status_ok)
-                    return false;
-                skip_quotes = false;
-
                 char buf[64];
                 snprintf(buf, sizeof(buf), "<ext of type %i size %u>", tag.exttype, tag.v.l);
-                print(out_file, buf, strlen(buf));
-                return true;
+                return writer.RawValue(buf, strlen(buf), kStringType);
             } else {
                 fprintf(stderr, "%s: ext type %i unencodable in JSON. Try debug viewing mode (-d)\n", options->command, tag.exttype);
                 return false;
             }
 
         case mpack_type_array:
-            if (yajl_gen_array_open(gen) != yajl_gen_status_ok)
+            if (!writer.StartArray())
                 return false;
             for (size_t i = 0; i < tag.v.l; ++i)
-                if (!element(reader, gen, options, depth + 1))
+                if (!element(reader, writer, options, depth + 1))
                     return false;
             mpack_done_array(reader);
-            return yajl_gen_array_close(gen) == yajl_gen_status_ok;
+            return writer.EndArray();
 
         case mpack_type_map:
-            if (yajl_gen_map_open(gen) != yajl_gen_status_ok)
+            if (!writer.StartObject())
                 return false;
             for (size_t i = 0; i < tag.v.l; ++i) {
 
                 if (options->debug) {
-                    element(reader, gen, options, depth + 1);
+                    element(reader, writer, options, depth + 1);
                 } else {
                     uint32_t len = mpack_expect_str(reader);
                     if (mpack_reader_error(reader) != mpack_ok) {
                         fprintf(stderr, "%s: map key is not a string. Try debug viewing mode (-d)\n", options->command);
                         return false;
                     }
-                    if (!string(reader, gen, options, len))
+                    if (!string(reader, writer, options, len))
                         return false;
                 }
 
-                if (!element(reader, gen, options, depth + 1))
+                if (!element(reader, writer, options, depth + 1))
                     return false;
             }
             mpack_done_map(reader);
-            return yajl_gen_map_close(gen) == yajl_gen_status_ok;
+            return writer.EndObject();
     }
 
     return true;
@@ -269,6 +255,7 @@ static bool convert(options_t* options) {
         in_file = stdin;
     }
 
+    static FILE* out_file = NULL;
     if (options->out_filename) {
         out_file = fopen(options->out_filename, "wb");
         if (out_file == NULL) {
@@ -281,22 +268,28 @@ static bool convert(options_t* options) {
         out_file = stdout;
     }
 
-    yajl_gen gen = yajl_gen_alloc(NULL);
-    if (options->pretty)
-        yajl_gen_config(gen, yajl_gen_beautify);
-    if (options->debug)
-        yajl_gen_config(gen, yajl_gen_allow_non_string_keys);
-    yajl_gen_config(gen, yajl_gen_print_callback, print, out_file);
-
     mpack_reader_t reader;
     mpack_reader_init_stack(&reader);
     mpack_reader_set_fill(&reader, fill);
     mpack_reader_set_context(&reader, in_file);
 
-    bool ret = element(&reader, gen, options, 0);
+    char* buffer = (char*)malloc(65536);
+    FileWriteStream stream(out_file, buffer, sizeof(buffer));
 
+    bool ret;
+    if (options->pretty) {
+        PrettyWriter<FileWriteStream> writer(stream);
+        ret = element(&reader, writer, options, 0);
+        // RapidJSON's PrettyWriter does not add a final
+        // newline at the end of the JSON
+        putc('\n', out_file);
+    } else {
+        Writer<FileWriteStream> writer(stream);
+        ret = element(&reader, writer, options, 0);
+    }
+
+    free(buffer);
     mpack_error_t error = mpack_reader_destroy(&reader);
-    yajl_gen_free(gen);
 
     if (out_file != stdout)
         fclose(out_file);
@@ -325,11 +318,7 @@ static void usage(const char* command) {
 static void version(const char* command) {
     fprintf(stderr, "%s version %s\n", command, VERSION);
     fprintf(stderr, "MPack version %s -- %s\n", MPACK_VERSION_STRING, "https://github.com/ludocode/mpack");
-
-    static char buf[16];
-    snprintf(buf, sizeof(buf), "%u.%u.%u", YAJL_MAJOR, YAJL_MINOR, YAJL_MICRO);
-    fprintf(stderr, "YAJL version %s -- %s\n", buf, "http://lloyd.github.io/yajl/");
-
+    fprintf(stderr, "RapidJSON version %s -- %s\n", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
     fprintf(stderr, "libb64 version %s -- %s\n", "1.2.1", "http://libb64.sourceforge.net/");
 }
 
