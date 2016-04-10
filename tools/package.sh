@@ -1,6 +1,5 @@
 #!/bin/bash
-# TODO put version in CMake
-VERSION=0.2
+VERSION=`cat src/common.h | grep "#define VERSION" | grep -o '".*"' | sed 's/"//g'`
 NAME=msgpack-tools-${VERSION}
 FILES="\
     README.md \

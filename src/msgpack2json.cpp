@@ -22,30 +22,18 @@
  * SOFTWARE.
  */
 
-#define _XOPEN_SOURCE
-
 // The code that checks that object keys are strings just uses
 // RAPIDJSON_ASSERT(). We define it to nothing to disable this
 // so we can write non-string keys in debug mode. (We actually
 // never call Key(), and always write whatever type we want.)
 #define RAPIDJSON_ASSERT(x) ((void)(x))
 
-#include <stdio.h>
-#include <unistd.h>
-
-extern "C" {
-#include "b64/cencode.h"
-}
-
-#include "mpack/mpack.h"
-#include "rapidjson/error/en.h"
+#include "common.h"
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/writer.h"
 
 using namespace rapidjson;
-
-#define VERSION "0.2"
 
 typedef struct options_t {
     const char* command;

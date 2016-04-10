@@ -22,23 +22,11 @@
  * SOFTWARE.
  */
 
-#define _XOPEN_SOURCE
-
-#include <stdio.h>
-#include <unistd.h>
+#include "common.h"
 #include <errno.h>
-
-extern "C" {
-#include "b64/cdecode.h"
-}
-
-#include "mpack/mpack.h"
 #include "rapidjson/document.h"
-#include "rapidjson/error/en.h"
 
 using namespace rapidjson;
-
-#define VERSION "0.2"
 
 typedef struct options_t {
     const char* command;

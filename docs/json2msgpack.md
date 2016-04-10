@@ -77,6 +77,11 @@ AUTHOR
 
 Nicholas Fraser <https://github.com/ludocode>
 
+VERSION
+-------
+
+$version
+
 SEE ALSO
 --------
 
