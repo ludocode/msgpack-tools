@@ -14,8 +14,8 @@ FILES="\
     docs/msgpack2json.1 \
     src \
     src/common.h \
-    src/json2msgpack.c \
-    src/msgpack2json.c \
+    src/json2msgpack.cpp \
+    src/msgpack2json.cpp \
     tests \
     tests/base64-bin-ext.mp \
     tests/base64-bin.mp \
