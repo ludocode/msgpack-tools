@@ -18,13 +18,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
-CHECK_C_COMPILER_FLAG("-std=c11" HAS_C11)
-if(HAS_C11)
-    set(C_FLAGS   "-std=c11")
-else()
-    set(C_FLAGS   "-std=c99")
-endif()
-
 CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CXX11)
 if(HAS_CXX11)
     set(CXX_FLAGS   "-std=c++11")
