@@ -13,6 +13,7 @@ FILES="\
     docs/json2msgpack.1 \
     docs/msgpack2json.1 \
     src \
+    src/common.h \
     src/json2msgpack.c \
     src/msgpack2json.c \
     tests \
