@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 
 include(GNUInstallDirs)
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
 
 project(msgpack2json)
 
@@ -16,20 +18,32 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
+CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CXX11)
+if(HAS_CXX11)
+    set(CXX_FLAGS   "-std=c++11")
+else()
+    set(CXX_FLAGS   "")
+endif()
+
+set(MPACK_VERSION "0.8.2")
+set(RAPIDJSON_COMMIT "75d0e4ff652769309052bbbb3745da12a572af9a")
+set(LIBB64_VERSION "1.2.1")
+
 if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
     # Windows support is not implemented yet
     add_definitions(/W2)
 else()
-    set(FLAGS "-std=c99 -Wall -Wextra")
-    set(CMAKE_C_FLAGS_DEBUG   "${FLAGS} -g -O0 -DDEBUG")
-    set(CMAKE_C_FLAGS_RELEASE "${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
+    set(FLAGS "-Wall -Wextra -DLIBB64_VERSION=\\\"${LIBB64_VERSION}\\\"")
+    set(CMAKE_C_FLAGS_DEBUG   "${C_FLAGS} ${FLAGS} -g -O0 -DDEBUG")
+    set(CMAKE_C_FLAGS_RELEASE "${C_FLAGS} ${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
+    set(CMAKE_CXX_FLAGS_DEBUG   "${CXX_FLAGS} ${FLAGS} -g -O0 -DDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CXX_FLAGS} ${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 endif()
 
 
 # mpack
 
-set(MPACK_VERSION "0.7")
 set(MPACK_FILE "mpack-amalgamation-${MPACK_VERSION}.tar.gz")
 set(MPACK_DIR "${CONTRIB_DIR}/mpack-amalgamation-${MPACK_VERSION}")
 
@@ -46,28 +60,22 @@ file(GLOB_RECURSE MPACK_SRCS ${MPACK_DIR}/src/*.c)
 include_directories(SYSTEM ${CMAKE_BINARY_DIR} ${MPACK_DIR}/src)
 
 
-# yajl
+# rapidjson
 
-set(YAJL_COMMIT "2c42d2a07e68bfdfb1d16c0ed7efd31f327aae49")
-set(YAJL_VERSION "2.1.1")
-set(YAJL_FILE "yajl-${YAJL_COMMIT}.tar.gz")
-set(YAJL_DIR "${CONTRIB_DIR}/yajl-${YAJL_COMMIT}")
+set(RAPIDJSON_FILE "rapidjson-${RAPIDJSON_COMMIT}.tar.gz")
+set(RAPIDJSON_DIR "${CONTRIB_DIR}/rapidjson-${RAPIDJSON_COMMIT}")
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${YAJL_FILE}")
-    message(FATAL_ERROR "\nYAJL source is missing: contrib/${YAJL_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE}")
+    message(FATAL_ERROR "\nRapidJSON source is missing: contrib/${RAPIDJSON_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
 endif()
 
-execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf "${CMAKE_SOURCE_DIR}/contrib/${YAJL_FILE}" WORKING_DIRECTORY "${CONTRIB_DIR}")
+execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE} WORKING_DIRECTORY ${CONTRIB_DIR})
 
-execute_process(COMMAND ./configure WORKING_DIRECTORY ${YAJL_DIR})
-
-file(GLOB_RECURSE YAJL_SRCS ${YAJL_DIR}/src/*.c)
-include_directories(SYSTEM ${YAJL_DIR}/build/yajl-${YAJL_VERSION}/include)
+include_directories(SYSTEM ${RAPIDJSON_DIR}/include)
 
 
 # libb64
 
-set(LIBB64_VERSION "1.2.1")
 set(LIBB64_FILE "libb64-${LIBB64_VERSION}.zip")
 set(LIBB64_DIR "${CONTRIB_DIR}/libb64-${LIBB64_VERSION}")
 
@@ -89,8 +97,8 @@ include_directories(SYSTEM ${LIBB64_DIR}/include)
 
 # targets
 
-add_executable(msgpack2json src/msgpack2json.c ${MPACK_SRCS} ${YAJL_SRCS} ${LIBB64_SRCS})
-add_executable(json2msgpack src/json2msgpack.c ${MPACK_SRCS} ${YAJL_SRCS} ${LIBB64_SRCS})
+add_executable(msgpack2json src/msgpack2json.cpp ${MPACK_SRCS} ${LIBB64_SRCS})
+add_executable(json2msgpack src/json2msgpack.cpp ${MPACK_SRCS} ${LIBB64_SRCS})
 
 install(TARGETS msgpack2json json2msgpack DESTINATION bin)
 

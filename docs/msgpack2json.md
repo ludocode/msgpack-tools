@@ -77,10 +77,20 @@ To fetch MessagePack from a web API and view it in a human-readable format:
 
 > `curl` *ht**tp://example/url* `| msgpack2json -d`
 
+BUGS
+----
+
+`msgpack2json` currently truncates strings that contain NUL bytes.
+
 AUTHOR
 ------
 
 Nicholas Fraser <https://github.com/ludocode>
+
+VERSION
+-------
+
+$version
 
 SEE ALSO
 --------
@@ -95,6 +105,6 @@ json2msgpack(1)
 
 [MPack](https://github.com/ludocode/mpack)
 
-[YAJL](http://lloyd.github.io/yajl/)
+[RapidJSON](http://rapidjson.org/)
 
 [libb64](http://libb64.sourceforge.net/)

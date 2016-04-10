@@ -32,7 +32,6 @@ OPTIONS
 
 - Comments are allowed and ignored
 - Trailing commas in maps and arrays are allowed and ignored
-- Single quotes can be used instead of double quotes to delimit strings
 
 `-f`
   Convert real numbers to floats instead of doubles.
@@ -59,8 +58,6 @@ OPTIONS
 NOTES
 -----
 
-Integers outside of the range \[INT64\_MIN, UINT64\_MAX\] will generate an error, since they cannot be stored in MessagePack.
-
 `json2msgpack` will preserve the ordering of key-value pairs in objects/maps, and does not check that keys are unique.
 
 EXAMPLES
@@ -70,10 +67,20 @@ To convert a hand-written JSON file to a MessagePack file, ignoring comments and
 
 > `json2msgpack -bli` *file.json* `-o` *file.mp*
 
+BUGS
+----
+
+Big integers outside of the range \[INT64\_MIN, UINT64\_MAX\] are converted to real numbers instead of causing a parse error. They will be output in MessagePack as doubles, or floats if `-f` was specified, with associated loss of precision.
+
 AUTHOR
 ------
 
 Nicholas Fraser <https://github.com/ludocode>
+
+VERSION
+-------
+
+$version
 
 SEE ALSO
 --------
@@ -86,8 +93,8 @@ msgpack2json(1)
 
 [MessagePack](http://msgpack.org/)
 
-[MPack](https://github.com/ludocode/mpack)
+[RapidJSON](http://rapidjson.org/)
 
-[YAJL](http://lloyd.github.io/yajl/)
+[MPack](https://github.com/ludocode/mpack)
 
 [libb64](http://libb64.sourceforge.net/)
