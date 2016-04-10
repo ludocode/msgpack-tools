@@ -39,6 +39,6 @@ extern "C" {
 #include "b64/cencode.h"
 }
 
-#define VERSION "0.3"
+#define VERSION "0.3.1"
 
 #endif
