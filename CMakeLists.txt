@@ -25,11 +25,15 @@ else()
     set(CXX_FLAGS   "")
 endif()
 
+set(MPACK_VERSION "0.8.2")
+set(RAPIDJSON_COMMIT "75d0e4ff652769309052bbbb3745da12a572af9a")
+set(LIBB64_VERSION "1.2.1")
+
 if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
     # Windows support is not implemented yet
     add_definitions(/W2)
 else()
-    set(FLAGS "-Wall -Wextra")
+    set(FLAGS "-Wall -Wextra -DLIBB64_VERSION=\\\"${LIBB64_VERSION}\\\"")
     set(CMAKE_C_FLAGS_DEBUG   "${C_FLAGS} ${FLAGS} -g -O0 -DDEBUG")
     set(CMAKE_C_FLAGS_RELEASE "${C_FLAGS} ${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
     set(CMAKE_CXX_FLAGS_DEBUG   "${CXX_FLAGS} ${FLAGS} -g -O0 -DDEBUG")
@@ -40,7 +44,6 @@ endif()
 
 # mpack
 
-set(MPACK_VERSION "0.8.2")
 set(MPACK_FILE "mpack-amalgamation-${MPACK_VERSION}.tar.gz")
 set(MPACK_DIR "${CONTRIB_DIR}/mpack-amalgamation-${MPACK_VERSION}")
 
@@ -59,7 +62,6 @@ include_directories(SYSTEM ${CMAKE_BINARY_DIR} ${MPACK_DIR}/src)
 
 # rapidjson
 
-set(RAPIDJSON_COMMIT "75d0e4ff652769309052bbbb3745da12a572af9a")
 set(RAPIDJSON_FILE "rapidjson-${RAPIDJSON_COMMIT}.tar.gz")
 set(RAPIDJSON_DIR "${CONTRIB_DIR}/rapidjson-${RAPIDJSON_COMMIT}")
 
@@ -74,7 +76,6 @@ include_directories(SYSTEM ${RAPIDJSON_DIR}/include)
 
 # libb64
 
-set(LIBB64_VERSION "1.2.1")
 set(LIBB64_FILE "libb64-${LIBB64_VERSION}.zip")
 set(LIBB64_DIR "${CONTRIB_DIR}/libb64-${LIBB64_VERSION}")
 

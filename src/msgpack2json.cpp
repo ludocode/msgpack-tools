@@ -307,7 +307,7 @@ static void version(const char* command) {
     fprintf(stderr, "%s version %s\n", command, VERSION);
     fprintf(stderr, "MPack version %s -- %s\n", MPACK_VERSION_STRING, "https://github.com/ludocode/mpack");
     fprintf(stderr, "RapidJSON version %s -- %s\n", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
-    fprintf(stderr, "libb64 version %s -- %s\n", "1.2.1", "http://libb64.sourceforge.net/");
+    fprintf(stderr, "libb64 version %s -- %s\n", LIBB64_VERSION, "http://libb64.sourceforge.net/");
 }
 
 int main(int argc, char** argv) {
