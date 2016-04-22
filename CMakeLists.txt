@@ -6,10 +6,14 @@ include(CheckCXXCompilerFlag)
 
 project(msgpack2json)
 
+# compat with cmake > 3.0, this should be autodetected with the git command (tag) or a released file
+set(PROJECT_VERSION_MAJOR 0)
+set(PROJECT_VERSION_MINOR 3)
+set(PROJECT_VERSION_PATCH 1)
+set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+
 set(CONTRIB_DIR ${CMAKE_BINARY_DIR}/contrib)
 file(MAKE_DIRECTORY ${CONTRIB_DIR})
-
-
 
 if(NOT CMAKE_BUILD_TYPE)
     message(STATUS "No build type selected, default to Release")
