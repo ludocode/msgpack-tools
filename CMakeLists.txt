@@ -9,6 +9,8 @@ project(msgpack2json)
 set(CONTRIB_DIR ${CMAKE_BINARY_DIR}/contrib)
 file(MAKE_DIRECTORY ${CONTRIB_DIR})
 
+
+
 if(NOT CMAKE_BUILD_TYPE)
     message(STATUS "No build type selected, default to Release")
     set(CMAKE_BUILD_TYPE "Release")
@@ -173,5 +175,6 @@ add_test("json2msgpack-base64-mixed-bin"      ${COMPARE} ${TESTS_DIR}/base64-bin
 #add_test("json2msgpack-base64-bin" ${COMPARE_SCRIPT} ${TESTS_DIR}/base64-bin.mp valgrind ./json2msgpack -bi ${TESTS_DIR}/base64-prefix.json)
 #add_test("json2msgpack-base64-bin-lax" ${COMPARE_SCRIPT} ${TESTS_DIR}/base64-bin.mp valgrind ./json2msgpack -lbi ${TESTS_DIR}/base64-prefix-lax.json)
 
+include(cmake/OSDetection.txt)
 include(cmake/CPackConfig.txt)
 include(CPack)

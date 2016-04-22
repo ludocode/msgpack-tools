@@ -1,0 +1,6 @@
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    if(EXISTS "/etc/debian_version")
+        message(STATUS "Debian-based Linux OS detected")
+        set(CMAKE_SYSTEM_VARIANT "Debian")
+    endif()
+endif()
