@@ -63,6 +63,12 @@ msgpack-tools is available in the [AUR](https://aur.archlinux.org/packages/msgpa
 
     yaourt -S msgpack-tools
 
+### OS X
+
+A Homebrew formula for msgpack-tools is [included](https://github.com/ludocode/msgpack-tools/blob/master/tools/msgpack-tools.rb) in the repository. This requires [Homebrew](http://brew.sh/).
+
+    brew install https://raw.githubusercontent.com/ludocode/msgpack-tools/master/tools/msgpack-tools.rb
+
 ### Other
 
 For other platforms, msgpack-tools currently must be built from source. The latest version of the msgpack-tools source archive should be downloaded from the releases page. This includes the library dependencies and has pre-generated man pages:
