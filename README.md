@@ -57,7 +57,15 @@ $ echo '[0,0,"sum",[1,2]]' | json2msgpack | nc -q1 localhost 18800 | msgpack2jso
 
 ## Installation
 
-msgpack-tools currently must be built from source. The latest version of the msgpack-tools source archive can be downloaded from the releases page. This includes the library dependencies and has pre-generated man pages:
+### Arch Linux
+
+msgpack-tools is available in the [AUR](https://aur.archlinux.org/packages/msgpack-tools/). It can be installed with `makepkg` or with any AUR helper:
+
+    yaourt -S msgpack-tools
+
+### Other
+
+For other platforms, msgpack-tools currently must be built from source. The latest version of the msgpack-tools source archive should be downloaded from the releases page. This includes the library dependencies and has pre-generated man pages:
 
 [https://github.com/ludocode/msgpack-tools/releases](https://github.com/ludocode/msgpack-tools/releases)
 
@@ -65,7 +73,7 @@ msgpack-tools uses CMake. A `configure` wrapper is provided that calls CMake, so
 
     ./configure && make && sudo make install
 
-If you are building from the repository, you will need to fetch the dependencies and generate the man pages. These are done with the scripts under `tools/fetch.sh` and `tools/man.sh`. [md2man](https://github.com/sunaku/md2man) is required to generate the man pages.
+If you are building from a clone of the repository, you will need to fetch the dependencies and generate the man pages. These are done with the scripts under `tools/fetch.sh` and `tools/man.sh`. [md2man](https://github.com/sunaku/md2man) is required to generate the man pages.
 
 ## Differences between MessagePack and JSON
 
