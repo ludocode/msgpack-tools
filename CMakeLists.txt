@@ -32,7 +32,7 @@ else()
     set(CXX_FLAGS   "")
 endif()
 
-set(MPACK_VERSION "0.8.2")
+set(MPACK_COMMIT "8c13a0d7f8a1232a189634768b94740861cbaf3e")
 set(RAPIDJSON_COMMIT "75d0e4ff652769309052bbbb3745da12a572af9a")
 set(LIBB64_VERSION "1.2.1")
 
@@ -51,17 +51,14 @@ endif()
 
 # mpack
 
-set(MPACK_FILE "mpack-amalgamation-${MPACK_VERSION}.tar.gz")
-set(MPACK_DIR "${CONTRIB_DIR}/mpack-amalgamation-${MPACK_VERSION}")
+set(MPACK_FILE "mpack-${MPACK_COMMIT}.tar.gz")
+set(MPACK_DIR "${CONTRIB_DIR}/mpack-${MPACK_COMMIT}")
 
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}")
     message(FATAL_ERROR "\nMPack source is missing: contrib/${MPACK_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
 endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE} WORKING_DIRECTORY ${CONTRIB_DIR})
-
-file(COPY ${MPACK_DIR}/src/mpack-config.h.sample DESTINATION ${CMAKE_BINARY_DIR})
-file(RENAME ${CMAKE_BINARY_DIR}/mpack-config.h.sample ${CMAKE_BINARY_DIR}/mpack-config.h)
 
 file(GLOB_RECURSE MPACK_SRCS ${MPACK_DIR}/src/*.c)
 include_directories(SYSTEM ${CMAKE_BINARY_DIR} ${MPACK_DIR}/src)
