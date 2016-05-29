@@ -106,8 +106,8 @@ add_executable(json2msgpack src/json2msgpack.cpp ${MPACK_SRCS} ${LIBB64_SRCS})
 
 install(TARGETS msgpack2json json2msgpack DESTINATION bin)
 
-install(FILES ${CMAKE_SOURCE_DIR}/docs/msgpack2json.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1)
-install(FILES ${CMAKE_SOURCE_DIR}/docs/json2msgpack.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1)
+install(FILES ${CMAKE_SOURCE_DIR}/docs/msgpack2json.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
+install(FILES ${CMAKE_SOURCE_DIR}/docs/json2msgpack.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
 
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/docs/msgpack2json.1")
     message(FATAL_ERROR "\nmsgpack2json man page is missing: docs/msgpack2json.1\nTo build from the repository, you need to generate manpages with tools/man.sh")
