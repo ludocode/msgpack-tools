@@ -18,22 +18,42 @@ They can be used for dumping MessagePack from a file or web API to a human-reada
 
 To view a MessagePack file in a human-readable format for debugging purposes:
 
-    msgpack2json -di file.mp
+```bash
+msgpack2json -di file.mp
+```
 
 To convert a hand-written JSON file to a MessagePack file, ignoring comments and trailing commas, and allowing embedded base64 with a `base64:` prefix:
 
-    json2msgpack -bli file.json -o file.mp
+```bash
+json2msgpack -bli file.json -o file.mp
+```
 
 To fetch MessagePack from a web API and view it in a human-readable format:
 
-    curl 'http://example/api/url' | msgpack2json -d
+```bash
+curl 'http://example/api/url' | msgpack2json -d
+```
 
 To view the MessagePack-equivalent encoding of a JSON string:
 
-    $ echo '{"compact": true, "schema": 0}' | json2msgpack | hexdump -C
-    00000000  82 a7 63 6f 6d 70 61 63  74 c3 a6 73 63 68 65 6d  |..compact..schem|
-    00000010  61 00                                             |a.|
-    00000012
+```bash
+$ echo '{"compact": true, "schema": 0}' | json2msgpack | hexdump -C
+00000000  82 a7 63 6f 6d 70 61 63  74 c3 a6 73 63 68 65 6d  |..compact..schem|
+00000010  61 00                                             |a.|
+00000012
+```
+
+To test a [MessagePack-RPC](https://github.com/msgpack-rpc/msgpack-rpc) server via netcat:
+
+```bash
+$ echo '[0,0,"sum",[1,2]]' | json2msgpack | nc -q1 localhost 18800 | msgpack2json -d
+[
+    1,
+    0,
+    null,
+    3
+]
+```
 
 ## Installation
 
@@ -63,6 +83,6 @@ These are the differences in what objects are representable in each format:
 
 - The top-level object in a JSON document must be either an array or object (map). The top-level object in MessagePack can be any type.
 
-- A JSON document must be entirely in one encoding. MessagePack does not specify encoding, and different strings in the same document can technically be in different encodings (though this is a really bad idea.)
+- A JSON document can be encoded in UTF-8, UTF-16 or UTF-32, and the entire document must be in the same encoding. MessagePack strings are required to be UTF-8, although this is not enforced by many encoding/decoding libraries.
 
 By default, `msgpack2json` and `json2msgpack` convert in strict mode. If an object in the source format is not representable in the destination format, the converter aborts with an error. A lax mode is available which performs a "lossy" conversion, and base64 conversion modes are available to support binary data in JSON.

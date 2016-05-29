@@ -5,4 +5,11 @@
 EXPECTED="$1"
 shift
 "$@" > "test-out.tmp"
+
+RESULT=$?
+echo "Command finished with result $RESULT"
+if [ $RESULT -ne 0 ]; then
+    exit 1
+fi
+
 diff "$EXPECTED" "test-out.tmp"
