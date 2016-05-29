@@ -83,6 +83,6 @@ These are the differences in what objects are representable in each format:
 
 - The top-level object in a JSON document must be either an array or object (map). The top-level object in MessagePack can be any type.
 
-- A JSON document must be entirely in one encoding. MessagePack does not specify encoding, and different strings in the same document can technically be in different encodings (though this is a really bad idea.)
+- A JSON document can be encoded in UTF-8, UTF-16 or UTF-32, and the entire document must be in the same encoding. MessagePack strings are required to be UTF-8, although this is not enforced by many encoding/decoding libraries.
 
 By default, `msgpack2json` and `json2msgpack` convert in strict mode. If an object in the source format is not representable in the destination format, the converter aborts with an error. A lax mode is available which performs a "lossy" conversion, and base64 conversion modes are available to support binary data in JSON.
