@@ -11,10 +11,10 @@ getstring() {
 }
 
 # fetch mpack
-MPACK_VERSION=`getstring MPACK_VERSION`
-MPACK_FILE="mpack-amalgamation-${MPACK_VERSION}.tar.gz"
+MPACK_COMMIT=`getstring MPACK_COMMIT`
+MPACK_FILE="mpack-${MPACK_COMMIT}.tar.gz"
 if ! [ -e "$MPACK_FILE" ]; then
-    MPACK_URL="https://github.com/ludocode/mpack/releases/download/v${MPACK_VERSION}/${MPACK_FILE}"
+    MPACK_URL="https://github.com/ludocode/mpack/archive/${MPACK_COMMIT}.tar.gz"
     curl -L -o "${MPACK_FILE}.tmp" "${MPACK_URL}" || exit $?
     mv "${MPACK_FILE}.tmp" "${MPACK_FILE}"
 fi

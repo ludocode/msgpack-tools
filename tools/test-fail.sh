@@ -5,7 +5,9 @@
 # uses 2 as an error code which causes a failure result from
 # this script.)
 "$@"
-if [ $? -ne 1 ]; then
+RESULT=$?
+echo "Command finished with result $RESULT"
+if [ $RESULT -ne 1 ]; then
     exit 1
 fi
 exit 0

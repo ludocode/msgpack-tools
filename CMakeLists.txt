@@ -38,8 +38,8 @@ else()
     set(CXX_FLAGS   "")
 endif()
 
-set(MPACK_VERSION "0.8.2")
-set(RAPIDJSON_COMMIT "75d0e4ff652769309052bbbb3745da12a572af9a")
+set(MPACK_COMMIT "8c13a0d7f8a1232a189634768b94740861cbaf3e")
+set(RAPIDJSON_COMMIT "369de87e5d7da05786731a712f25ab9b46c4b0ce")
 set(LIBB64_VERSION "1.2.1")
 
 if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
@@ -57,8 +57,8 @@ endif()
 
 # mpack
 
-set(MPACK_FILE "mpack-amalgamation-${MPACK_VERSION}.tar.gz")
-set(MPACK_DIR "${CONTRIB_DIR}/mpack-amalgamation-${MPACK_VERSION}")
+set(MPACK_FILE "mpack-${MPACK_COMMIT}.tar.gz")
+set(MPACK_DIR "${CONTRIB_DIR}/mpack-${MPACK_COMMIT}")
 
 file(DOWNLOAD
     "https://github.com/ludocode/mpack/releases/download/v${MPACK_VERSION}/${MPACK_FILE}"
@@ -70,9 +70,6 @@ if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}")
 endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE} WORKING_DIRECTORY ${CONTRIB_DIR})
-
-file(COPY ${MPACK_DIR}/src/mpack-config.h.sample DESTINATION ${CMAKE_BINARY_DIR})
-file(RENAME ${CMAKE_BINARY_DIR}/mpack-config.h.sample ${CMAKE_BINARY_DIR}/mpack-config.h)
 
 file(GLOB_RECURSE MPACK_SRCS ${MPACK_DIR}/src/*.c)
 include_directories(SYSTEM ${CMAKE_BINARY_DIR} ${MPACK_DIR}/src)
@@ -130,18 +127,16 @@ add_executable(json2msgpack src/json2msgpack.cpp ${MPACK_SRCS} ${LIBB64_SRCS})
 
 install(TARGETS msgpack2json json2msgpack DESTINATION bin)
 
-# Man pages
-
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/docs/msgpack2json.1")
     message(WARNING "\nmsgpack2json man page is missing: docs/msgpack2json.1\nTo build from the repository, you need to generate manpages with tools/man.sh")
 else()
-    install(FILES ${CMAKE_SOURCE_DIR}/docs/msgpack2json.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1)
+    install(FILES ${CMAKE_SOURCE_DIR}/docs/msgpack2json.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
 endif()
 
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/docs/json2msgpack.1")
     message(WARNING "\njson2msgpack man page is missing: docs/json2msgpack.1\nTo build from the repository, you need to generate manpages with tools/man.sh")
 else()
-    install(FILES ${CMAKE_SOURCE_DIR}/docs/json2msgpack.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1)
+    install(FILES ${CMAKE_SOURCE_DIR}/docs/json2msgpack.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
 endif()
 
 
@@ -175,6 +170,11 @@ add_test("json2msgpack-base64-detect-bin-one" ${COMPARE} ${TESTS_DIR}/base64-bin
 
 add_test("json2msgpack-base64-mixed-partial"  ${COMPARE} ${TESTS_DIR}/base64-partial-ext.mp ${VALGRIND} ./json2msgpack -bB 50 -i ${TESTS_DIR}/base64-mixed.json)
 add_test("json2msgpack-base64-mixed-bin"      ${COMPARE} ${TESTS_DIR}/base64-bin-ext.mp     ${VALGRIND} ./json2msgpack -bB 22 -i ${TESTS_DIR}/base64-mixed.json)
+
+add_test("json2msgpack-value-string"          ${COMPARE} ${TESTS_DIR}/value-string.mp       ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/value-string.json)
+add_test("json2msgpack-value-int"             ${COMPARE} ${TESTS_DIR}/value-int.mp          ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/value-int.json)
+add_test("msgpack2json-value-string"          ${COMPARE} ${TESTS_DIR}/value-string.json     ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/value-string.mp)
+add_test("msgpack2json-value-int"             ${COMPARE} ${TESTS_DIR}/value-int.json        ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/value-int.mp)
 
 #add_test("json2msgpack-base64-bin" ${COMPARE_SCRIPT} ${TESTS_DIR}/base64-bin.mp valgrind ./json2msgpack -bi ${TESTS_DIR}/base64-prefix.json)
 #add_test("json2msgpack-base64-bin-lax" ${COMPARE_SCRIPT} ${TESTS_DIR}/base64-bin.mp valgrind ./json2msgpack -lbi ${TESTS_DIR}/base64-prefix-lax.json)

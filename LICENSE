@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) 2015 Nicholas Fraser
+Copyright (c) 2015-2016 Nicholas Fraser
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,17 +22,17 @@ SOFTWARE.
 
 ------------------------------------------------------------------------
 
-The msgpack2json repository includes files from the following open source
+The msgpack-tools repository includes files from the following open source
 projects:
 
-    configure-cmake - https://github.com/nemequ/configure-cmake
+    configure-cmake - https://github.com/nemequ/configure-cmake - CC0
 
-In addition to the above, the msgpack2json redistributable package
-includes packaged code from the following open source libraries:
+In addition to the above, the msgpack-tools compiled binaries and
+redistributable package include code from the following open source libraries:
 
-    MPack     - https://github.com/ludocode/mpack
-    RapidJSON - http://rapidjson.org/
-    libb64    - http://libb64.sourceforge.net/
+    MPack     - https://github.com/ludocode/mpack - MIT
+    RapidJSON - http://rapidjson.org/             - MIT, BSD, JSON
+    libb64    - http://libb64.sourceforge.net/    - Public Domain
 
 These libraries are covered by their respective licenses included in
 their packages.
