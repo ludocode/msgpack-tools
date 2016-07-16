@@ -41,4 +41,6 @@ extern "C" {
 
 #define VERSION "0.4"
 
+#define BUFFER_SIZE 65536
+
 #endif

@@ -261,8 +261,8 @@ static bool convert(options_t* options) {
     mpack_reader_set_fill(&reader, fill);
     mpack_reader_set_context(&reader, in_file);
 
-    char* buffer = (char*)malloc(65536);
-    FileWriteStream stream(out_file, buffer, sizeof(buffer));
+    char* buffer = (char*)malloc(BUFFER_SIZE);
+    FileWriteStream stream(out_file, buffer, BUFFER_SIZE);
 
     bool ret;
     if (options->pretty) {
