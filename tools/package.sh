@@ -4,6 +4,7 @@ NAME=msgpack-tools-${VERSION}
 FILES="\
     README.md \
     LICENSE \
+    AUTHORS \
     CMakeLists.txt \
     configure \
     contrib \
