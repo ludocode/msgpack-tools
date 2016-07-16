@@ -59,14 +59,16 @@ endif()
 
 set(MPACK_FILE "mpack-${MPACK_COMMIT}.tar.gz")
 set(MPACK_DIR "${CONTRIB_DIR}/mpack-${MPACK_COMMIT}")
+set(MPACK_URL "https://github.com/ludocode/mpack/archive/${MPACK_COMMIT}.tar.gz")
 
-file(DOWNLOAD
-    "https://github.com/ludocode/mpack/archive/${MPACK_COMMIT}.tar.gz"
-    "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}"
-)
-
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}")
-    message(FATAL_ERROR "\nMPack source is missing: contrib/${MPACK_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
+if(EXISTS "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}")
+    message(STATUS "Found package: ${MPACK_FILE}")
+else()
+    message(STATUS "Downloading: ${MPACK_FILE}")
+    file(DOWNLOAD ${MPACK_URL} "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}")
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}")
+        message(FATAL_ERROR "\nFailed to download source file: ${MPACK_FILE}\nFrom: ${MPACK_URL}")
+    endif()
 endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE} WORKING_DIRECTORY ${CONTRIB_DIR})
@@ -79,14 +81,16 @@ include_directories(SYSTEM ${CMAKE_BINARY_DIR} ${MPACK_DIR}/src)
 
 set(RAPIDJSON_FILE "rapidjson-${RAPIDJSON_COMMIT}.tar.gz")
 set(RAPIDJSON_DIR "${CONTRIB_DIR}/rapidjson-${RAPIDJSON_COMMIT}")
+set(RAPIDJSON_URL "https://github.com/miloyip/rapidjson/archive/${RAPIDJSON_COMMIT}.tar.gz")
 
-file(DOWNLOAD
-    "https://github.com/miloyip/rapidjson/archive/${RAPIDJSON_COMMIT}.tar.gz"
-    "${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE}"
-)
-
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE}")
-    message(FATAL_ERROR "\nRapidJSON source is missing: contrib/${RAPIDJSON_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
+if(EXISTS "${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE}")
+    message(STATUS "Found package: ${RAPIDJSON_FILE}")
+else()
+    message(STATUS "Downloading: ${RAPIDJSON_FILE}")
+    file(DOWNLOAD ${RAPIDJSON_URL} "${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE}")
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE}")
+        message(FATAL_ERROR "\nFailed to download source file: ${RAPIDJSON_FILE}\nFrom: ${RAPIDJSON_URL}")
+    endif()
 endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE} WORKING_DIRECTORY ${CONTRIB_DIR})
@@ -98,14 +102,16 @@ include_directories(SYSTEM ${RAPIDJSON_DIR}/include)
 
 set(LIBB64_FILE "libb64-${LIBB64_VERSION}.zip")
 set(LIBB64_DIR "${CONTRIB_DIR}/libb64-${LIBB64_VERSION}")
+set(LIBB64_URL "http://downloads.sourceforge.net/project/libb64/libb64/libb64/${LIBB64_FILE}?use_mirror=autoselect")
 
-file(DOWNLOAD
-    "http://downloads.sourceforge.net/project/libb64/libb64/libb64/${LIBB64_FILE}?use_mirror=autoselect"
-    "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}"
-)
-
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}")
-    message(FATAL_ERROR "\nlibb64 source is missing: contrib/${LIBB64_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
+if(EXISTS "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}")
+    message(STATUS "Found package: ${LIBB64_FILE}")
+else()
+    message(STATUS "Downloading: ${LIBB64_FILE}")
+    file(DOWNLOAD ${LIBB64_URL} "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}")
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}")
+        message(FATAL_ERROR "\nFailed to download source file: ${LIBB64_FILE}\nFrom: ${LIBB64_URL}")
+    endif()
 endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar xf "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}" WORKING_DIRECTORY "${CONTRIB_DIR}")
