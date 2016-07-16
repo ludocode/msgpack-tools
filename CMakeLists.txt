@@ -61,7 +61,7 @@ set(MPACK_FILE "mpack-${MPACK_COMMIT}.tar.gz")
 set(MPACK_DIR "${CONTRIB_DIR}/mpack-${MPACK_COMMIT}")
 
 file(DOWNLOAD
-    "https://github.com/ludocode/mpack/releases/download/v${MPACK_VERSION}/${MPACK_FILE}"
+    "https://github.com/ludocode/mpack/archive/${MPACK_COMMIT}.tar.gz"
     "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}"
 )
 
