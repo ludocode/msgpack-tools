@@ -10,9 +10,14 @@ They can be used for dumping MessagePack from a file or web API to a human-reada
 
 ## Build Status
 
-| [Travis-CI](https://travis-ci.org/) |
-| :-------: |
-| [![Build Status](https://travis-ci.org/ludocode/msgpack-tools.svg?branch=master)](https://travis-ci.org/ludocode/msgpack-tools/branches) |
+[travis-home]: https://travis-ci.org/
+[travis-msgpack-tools]: https://travis-ci.org/ludocode/msgpack-tools/branches
+
+<!-- we use some deprecated HTML attributes here to get these stupid badges to line up properly -->
+| Branch    | [Travis-CI][travis-home] |
+| :-------: | :-------: |
+| _master_  | [<img src="https://travis-ci.org/ludocode/msgpack-tools.svg?branch=master" alt="Build Status" align="top" vspace="4">][travis-msgpack-tools] |
+| _develop_  | [<img src="https://travis-ci.org/ludocode/msgpack-tools.svg?branch=develop" alt="Build Status" align="top" vspace="4">][travis-msgpack-tools] |
 
 ## Examples
 
