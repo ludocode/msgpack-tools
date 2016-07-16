@@ -131,23 +131,52 @@ file(GLOB_RECURSE LIBB64_SRCS ${LIBB64_DIR}/src/*.c)
 include_directories(SYSTEM ${LIBB64_DIR}/include)
 
 
-# targets
+# executable targets
 
 add_executable(msgpack2json src/msgpack2json.cpp ${MPACK_SRCS} ${LIBB64_SRCS})
 add_executable(json2msgpack src/json2msgpack.cpp ${MPACK_SRCS} ${LIBB64_SRCS})
 
 install(TARGETS msgpack2json json2msgpack DESTINATION bin)
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/docs/msgpack2json.1")
-    message(WARNING "\nmsgpack2json man page is missing: docs/msgpack2json.1\nTo build from the repository, you need to generate manpages with tools/man.sh")
-else()
-    install(FILES ${CMAKE_SOURCE_DIR}/docs/msgpack2json.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
-endif()
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/docs/json2msgpack.1")
-    message(WARNING "\njson2msgpack man page is missing: docs/json2msgpack.1\nTo build from the repository, you need to generate manpages with tools/man.sh")
-else()
+# manpages
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/docs/msgpack2json.1" AND EXISTS "${CMAKE_SOURCE_DIR}/docs/json2msgpack.1")
+    # install pre-generated pages
+    message(STATUS "Found pre-generated man pages: docs/msgpack2json.1 docs/json2msgpack.1")
+    install(FILES ${CMAKE_SOURCE_DIR}/docs/msgpack2json.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
     install(FILES ${CMAKE_SOURCE_DIR}/docs/json2msgpack.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
+else()
+
+    # try to find md2man-roff
+    find_program(MD2MAN-ROFF md2man-roff)
+    if(MD2MAN-ROFF STREQUAL "MD2MAN-ROFF-NOTFOUND")
+        message(WARNING "\nmd2man-roff is not installed. Man pages will not be created!\nSee: https://github.com/sunaku/md2man")
+    else()
+
+        # add custom commands to build man pages
+        # cmake is insanely verbose for creating custom builders
+
+        message(STATUS "Found md2man-roff: ${MD2MAN-ROFF}")
+        add_custom_command(
+            OUTPUT ${CMAKE_BINARY_DIR}/msgpack2json.1
+            MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/docs/msgpack2json.md
+            COMMAND ${MD2MAN-ROFF} ${CMAKE_SOURCE_DIR}/docs/msgpack2json.md > ${CMAKE_BINARY_DIR}/msgpack2json.1
+            VERBATIM)
+        add_custom_target(msgpack2json-man DEPENDS ${CMAKE_BINARY_DIR}/msgpack2json.1)
+        add_dependencies(msgpack2json msgpack2json-man)
+        install(FILES ${CMAKE_BINARY_DIR}/msgpack2json.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
+
+        add_custom_command(
+            OUTPUT ${CMAKE_BINARY_DIR}/json2msgpack.1
+            MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/docs/json2msgpack.md
+            COMMAND ${MD2MAN-ROFF} ${CMAKE_SOURCE_DIR}/docs/json2msgpack.md > ${CMAKE_BINARY_DIR}/json2msgpack.1
+            VERBATIM)
+        add_custom_target(json2msgpack-man DEPENDS ${CMAKE_BINARY_DIR}/json2msgpack.1)
+        add_dependencies(json2msgpack json2msgpack-man)
+        install(FILES ${CMAKE_BINARY_DIR}/json2msgpack.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
+
+    endif()
 endif()
 
 

@@ -8,18 +8,18 @@ else
     CMAKE_BUILD_TYPE=Release
 fi
 
-tools/man.sh || exit $?
-
 mkdir -p build
 cd build
 
 if [[ "$CC" == "scan-build" ]]; then
     unset CXX
     CC=`which clang`
-    cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} .. || exit $?
+    cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX="./install" .. || exit $?
     unset CC
-    scan-build -o analysis --use-cc=`which clang` --status-bugs make all test || exit $?
+    scan-build -o analysis --use-cc=`which clang` --status-bugs make all test install || exit $?
 else
-    cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} .. || exit $?
-    make all test || exit $?
+    cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX="./install" .. || exit $?
+    make all test install || exit $?
 fi
+
+find install
