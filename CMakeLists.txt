@@ -165,7 +165,7 @@ else()
             VERBATIM)
         add_custom_target(msgpack2json-man DEPENDS ${CMAKE_BINARY_DIR}/msgpack2json.1)
         add_dependencies(msgpack2json msgpack2json-man)
-        install(FILES ${CMAKE_BINARY_DIR}/msgpack2json.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
+        install(FILES ${CMAKE_BINARY_DIR}/msgpack2json.1 DESTINATION share/man/man1)
 
         add_custom_command(
             OUTPUT ${CMAKE_BINARY_DIR}/json2msgpack.1
@@ -174,7 +174,7 @@ else()
             VERBATIM)
         add_custom_target(json2msgpack-man DEPENDS ${CMAKE_BINARY_DIR}/json2msgpack.1)
         add_dependencies(json2msgpack json2msgpack-man)
-        install(FILES ${CMAKE_BINARY_DIR}/json2msgpack.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
+        install(FILES ${CMAKE_BINARY_DIR}/json2msgpack.1 DESTINATION share/man/man1)
 
     endif()
 endif()
@@ -216,9 +216,19 @@ add_test("json2msgpack-value-int"             ${COMPARE} ${TESTS_DIR}/value-int.
 add_test("msgpack2json-value-string"          ${COMPARE} ${TESTS_DIR}/value-string.json     ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/value-string.mp)
 add_test("msgpack2json-value-int"             ${COMPARE} ${TESTS_DIR}/value-int.json        ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/value-int.mp)
 
-#add_test("json2msgpack-base64-bin" ${COMPARE_SCRIPT} ${TESTS_DIR}/base64-bin.mp valgrind ./json2msgpack -bi ${TESTS_DIR}/base64-prefix.json)
-#add_test("json2msgpack-base64-bin-lax" ${COMPARE_SCRIPT} ${TESTS_DIR}/base64-bin.mp valgrind ./json2msgpack -lbi ${TESTS_DIR}/base64-prefix-lax.json)
 
-include(cmake/OSDetection.txt)
-include(cmake/CPackConfig.txt)
-include(CPack)
+# packaging
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND EXISTS "/etc/debian_version")
+    message(STATUS "Debian-based Linux OS detected")
+    set(CPACK_GENERATOR "DEB")
+    set(CPACK_PACKAGE_NAME "msgpack-tools")
+    set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+    string(TOLOWER "${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}" CPACK_SYSTEM_NAME)
+    set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${PROJECT_VERSION}-${CPACK_SYSTEM_NAME}" )
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/ludocode/msgpack-tools")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Jerry Jacobs")
+    set(CPACK_PACKAGE_CONTACT "jerry.jacobs@xor-gate.org")
+    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "Command-line tools for converting between MessagePack and JSON")
+    include(CPack)
+endif()
