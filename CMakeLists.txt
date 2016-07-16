@@ -8,9 +8,14 @@ project(msgpack2json)
 
 # compat with cmake > 3.0, this should be autodetected with the git command (tag) or a released file
 set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 3)
-set(PROJECT_VERSION_PATCH 1)
-set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+set(PROJECT_VERSION_MINOR 5)
+set(PROJECT_VERSION_PATCH 0)
+
+if(PROJECT_VERSION_PATCH STREQUAL "0")
+    set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+else()
+    set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+endif()
 
 set(CONTRIB_DIR ${CMAKE_BINARY_DIR}/contrib)
 file(MAKE_DIRECTORY ${CONTRIB_DIR})
@@ -46,7 +51,7 @@ if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
     # Windows support is not implemented yet
     add_definitions(/W2)
 else()
-    set(FLAGS "-Wall -Wextra -DLIBB64_VERSION=\\\"${LIBB64_VERSION}\\\"")
+    set(FLAGS "-Wall -Wextra -DVERSION=\\\"${PROJECT_VERSION}\\\" -DLIBB64_VERSION=\\\"${LIBB64_VERSION}\\\"")
     set(CMAKE_C_FLAGS_DEBUG   "${C_FLAGS} ${FLAGS} -g -O0 -DDEBUG")
     set(CMAKE_C_FLAGS_RELEASE "${C_FLAGS} ${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
     set(CMAKE_CXX_FLAGS_DEBUG   "${CXX_FLAGS} ${FLAGS} -g -O0 -DDEBUG")
