@@ -1,3 +1,11 @@
+Unreleased
+----------
+
+Changes:
+
+- Removed top-level array/map requirement
+- Fixed incorrect buffer sizes
+
 msgpack-tools v0.4
 ------------------
 

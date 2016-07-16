@@ -148,5 +148,10 @@ add_test("json2msgpack-base64-detect-bin-one" ${COMPARE} ${TESTS_DIR}/base64-bin
 add_test("json2msgpack-base64-mixed-partial"  ${COMPARE} ${TESTS_DIR}/base64-partial-ext.mp ${VALGRIND} ./json2msgpack -bB 50 -i ${TESTS_DIR}/base64-mixed.json)
 add_test("json2msgpack-base64-mixed-bin"      ${COMPARE} ${TESTS_DIR}/base64-bin-ext.mp     ${VALGRIND} ./json2msgpack -bB 22 -i ${TESTS_DIR}/base64-mixed.json)
 
+add_test("json2msgpack-value-string"          ${COMPARE} ${TESTS_DIR}/value-string.mp       ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/value-string.json)
+add_test("json2msgpack-value-int"             ${COMPARE} ${TESTS_DIR}/value-int.mp          ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/value-int.json)
+add_test("msgpack2json-value-string"          ${COMPARE} ${TESTS_DIR}/value-string.json     ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/value-string.mp)
+add_test("msgpack2json-value-int"             ${COMPARE} ${TESTS_DIR}/value-int.json        ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/value-int.mp)
+
 #add_test("json2msgpack-base64-bin" ${COMPARE_SCRIPT} ${TESTS_DIR}/base64-bin.mp valgrind ./json2msgpack -bi ${TESTS_DIR}/base64-prefix.json)
 #add_test("json2msgpack-base64-bin-lax" ${COMPARE_SCRIPT} ${TESTS_DIR}/base64-bin.mp valgrind ./json2msgpack -lbi ${TESTS_DIR}/base64-prefix-lax.json)
