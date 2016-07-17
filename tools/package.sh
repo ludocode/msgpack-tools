@@ -56,7 +56,7 @@ FILES="\
     tools/test-fail.sh \
     "
 
-md2man-roff docs/json2msgpack.md > docs/json2msgpack.1 || exit $?
-md2man-roff docs/msgpack2json.md > docs/msgpack2json.1 || exit $?
+cat docs/json2msgpack.md | sed "s/\$version/$VERSION/" | md2man-roff > docs/json2msgpack.1 || exit $?
+cat docs/msgpack2json.md | sed "s/\$version/$VERSION/" | md2man-roff > docs/msgpack2json.1 || exit $?
 
 tar -czf ${NAME}.tar.gz --transform "s@^@$NAME/@" --no-recursion ${FILES}

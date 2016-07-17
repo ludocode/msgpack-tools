@@ -161,7 +161,7 @@ else()
         add_custom_command(
             OUTPUT ${CMAKE_BINARY_DIR}/msgpack2json.1
             MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/docs/msgpack2json.md
-            COMMAND ${MD2MAN-ROFF} ${CMAKE_SOURCE_DIR}/docs/msgpack2json.md > ${CMAKE_BINARY_DIR}/msgpack2json.1
+            COMMAND cat ${CMAKE_SOURCE_DIR}/docs/msgpack2json.md | sed "s/\$version/${PROJECT_VERSION}/" | ${MD2MAN-ROFF} > ${CMAKE_BINARY_DIR}/msgpack2json.1
             VERBATIM)
         add_custom_target(msgpack2json-man DEPENDS ${CMAKE_BINARY_DIR}/msgpack2json.1)
         add_dependencies(msgpack2json msgpack2json-man)
@@ -170,7 +170,7 @@ else()
         add_custom_command(
             OUTPUT ${CMAKE_BINARY_DIR}/json2msgpack.1
             MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/docs/json2msgpack.md
-            COMMAND ${MD2MAN-ROFF} ${CMAKE_SOURCE_DIR}/docs/json2msgpack.md > ${CMAKE_BINARY_DIR}/json2msgpack.1
+            COMMAND cat ${CMAKE_SOURCE_DIR}/docs/json2msgpack.md | sed "s/\$version/${PROJECT_VERSION}/" | ${MD2MAN-ROFF} > ${CMAKE_BINARY_DIR}/json2msgpack.1
             VERBATIM)
         add_custom_target(json2msgpack-man DEPENDS ${CMAKE_BINARY_DIR}/json2msgpack.1)
         add_dependencies(json2msgpack json2msgpack-man)
