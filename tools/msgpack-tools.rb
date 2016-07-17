@@ -3,9 +3,9 @@
 class MsgpackTools < Formula
   desc "Command-line tools for converting between MessagePack and JSON"
   homepage "https://github.com/ludocode/msgpack-tools"
-  url "https://github.com/ludocode/msgpack-tools/releases/download/v0.4/msgpack-tools-0.4.tar.gz"
-  version "0.4"
-  sha256 "6ca77477ed47ccf4ac882ace3ee5f33a7bc7b929d12c5f10fa0c8fb5874fbc10"
+  url "https://github.com/ludocode/msgpack-tools/releases/download/v0.5/msgpack-tools-0.5.tar.gz"
+  version "0.5"
+  sha256 "6f382a74fd8715a8a0e6a2561a9f10b16db7604b3139486908b4054709f81d08"
 
   depends_on "cmake" => :build
 
