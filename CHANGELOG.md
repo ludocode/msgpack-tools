@@ -1,9 +1,11 @@
-Unreleased
-----------
+msgpack-tools v0.5
+------------------
 
 Changes:
 
-- Removed top-level array/map requirement
+- Removed top-level array/map requirement (#3)
+- Moved dependency downloading and man page generation into CMake build process (#2)
+- Added support for build .deb package (#1)
 - Fixed incorrect buffer sizes
 
 msgpack-tools v0.4
