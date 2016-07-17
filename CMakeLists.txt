@@ -6,6 +6,17 @@ include(CheckCXXCompilerFlag)
 
 project(msgpack2json)
 
+# compat with cmake > 3.0, this should be autodetected with the git command (tag) or a released file
+set(PROJECT_VERSION_MAJOR 0)
+set(PROJECT_VERSION_MINOR 5)
+set(PROJECT_VERSION_PATCH 0)
+
+if(PROJECT_VERSION_PATCH STREQUAL "0")
+    set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+else()
+    set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+endif()
+
 set(CONTRIB_DIR ${CMAKE_BINARY_DIR}/contrib)
 file(MAKE_DIRECTORY ${CONTRIB_DIR})
 
@@ -33,14 +44,14 @@ else()
 endif()
 
 set(MPACK_COMMIT "8c13a0d7f8a1232a189634768b94740861cbaf3e")
-set(RAPIDJSON_COMMIT "75d0e4ff652769309052bbbb3745da12a572af9a")
+set(RAPIDJSON_COMMIT "369de87e5d7da05786731a712f25ab9b46c4b0ce")
 set(LIBB64_VERSION "1.2.1")
 
 if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
     # Windows support is not implemented yet
     add_definitions(/W2)
 else()
-    set(FLAGS "-Wall -Wextra -DLIBB64_VERSION=\\\"${LIBB64_VERSION}\\\"")
+    set(FLAGS "-Wall -Wextra -DVERSION=\\\"${PROJECT_VERSION}\\\" -DLIBB64_VERSION=\\\"${LIBB64_VERSION}\\\"")
     set(CMAKE_C_FLAGS_DEBUG   "${C_FLAGS} ${FLAGS} -g -O0 -DDEBUG")
     set(CMAKE_C_FLAGS_RELEASE "${C_FLAGS} ${FLAGS} -O3 -DNDEBUG -fPIC -DPIC")
     set(CMAKE_CXX_FLAGS_DEBUG   "${CXX_FLAGS} ${FLAGS} -g -O0 -DDEBUG")
@@ -53,9 +64,16 @@ endif()
 
 set(MPACK_FILE "mpack-${MPACK_COMMIT}.tar.gz")
 set(MPACK_DIR "${CONTRIB_DIR}/mpack-${MPACK_COMMIT}")
+set(MPACK_URL "https://github.com/ludocode/mpack/archive/${MPACK_COMMIT}.tar.gz")
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}")
-    message(FATAL_ERROR "\nMPack source is missing: contrib/${MPACK_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
+if(EXISTS "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}")
+    message(STATUS "Found package: ${MPACK_FILE}")
+else()
+    message(STATUS "Downloading: ${MPACK_FILE}")
+    file(DOWNLOAD ${MPACK_URL} "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}")
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE}")
+        message(FATAL_ERROR "\nFailed to download source file: ${MPACK_FILE}\nFrom: ${MPACK_URL}")
+    endif()
 endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/contrib/${MPACK_FILE} WORKING_DIRECTORY ${CONTRIB_DIR})
@@ -68,9 +86,16 @@ include_directories(SYSTEM ${CMAKE_BINARY_DIR} ${MPACK_DIR}/src)
 
 set(RAPIDJSON_FILE "rapidjson-${RAPIDJSON_COMMIT}.tar.gz")
 set(RAPIDJSON_DIR "${CONTRIB_DIR}/rapidjson-${RAPIDJSON_COMMIT}")
+set(RAPIDJSON_URL "https://github.com/miloyip/rapidjson/archive/${RAPIDJSON_COMMIT}.tar.gz")
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE}")
-    message(FATAL_ERROR "\nRapidJSON source is missing: contrib/${RAPIDJSON_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
+if(EXISTS "${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE}")
+    message(STATUS "Found package: ${RAPIDJSON_FILE}")
+else()
+    message(STATUS "Downloading: ${RAPIDJSON_FILE}")
+    file(DOWNLOAD ${RAPIDJSON_URL} "${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE}")
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE}")
+        message(FATAL_ERROR "\nFailed to download source file: ${RAPIDJSON_FILE}\nFrom: ${RAPIDJSON_URL}")
+    endif()
 endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/contrib/${RAPIDJSON_FILE} WORKING_DIRECTORY ${CONTRIB_DIR})
@@ -82,9 +107,16 @@ include_directories(SYSTEM ${RAPIDJSON_DIR}/include)
 
 set(LIBB64_FILE "libb64-${LIBB64_VERSION}.zip")
 set(LIBB64_DIR "${CONTRIB_DIR}/libb64-${LIBB64_VERSION}")
+set(LIBB64_URL "http://downloads.sourceforge.net/project/libb64/libb64/libb64/${LIBB64_FILE}?use_mirror=autoselect")
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}")
-    message(FATAL_ERROR "\nlibb64 source is missing: contrib/${LIBB64_FILE}\nTo build from the repository, you need to fetch dependencies with tools/fetch.sh")
+if(EXISTS "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}")
+    message(STATUS "Found package: ${LIBB64_FILE}")
+else()
+    message(STATUS "Downloading: ${LIBB64_FILE}")
+    file(DOWNLOAD ${LIBB64_URL} "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}")
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}")
+        message(FATAL_ERROR "\nFailed to download source file: ${LIBB64_FILE}\nFrom: ${LIBB64_URL}")
+    endif()
 endif()
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar xf "${CMAKE_SOURCE_DIR}/contrib/${LIBB64_FILE}" WORKING_DIRECTORY "${CONTRIB_DIR}")
@@ -99,21 +131,52 @@ file(GLOB_RECURSE LIBB64_SRCS ${LIBB64_DIR}/src/*.c)
 include_directories(SYSTEM ${LIBB64_DIR}/include)
 
 
-# targets
+# executable targets
 
 add_executable(msgpack2json src/msgpack2json.cpp ${MPACK_SRCS} ${LIBB64_SRCS})
 add_executable(json2msgpack src/json2msgpack.cpp ${MPACK_SRCS} ${LIBB64_SRCS})
 
 install(TARGETS msgpack2json json2msgpack DESTINATION bin)
 
-install(FILES ${CMAKE_SOURCE_DIR}/docs/msgpack2json.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
-install(FILES ${CMAKE_SOURCE_DIR}/docs/json2msgpack.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/docs/msgpack2json.1")
-    message(FATAL_ERROR "\nmsgpack2json man page is missing: docs/msgpack2json.1\nTo build from the repository, you need to generate manpages with tools/man.sh")
-endif()
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/docs/json2msgpack.1")
-    message(FATAL_ERROR "\njson2msgpack man page is missing: docs/json2msgpack.1\nTo build from the repository, you need to generate manpages with tools/man.sh")
+# manpages
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/docs/msgpack2json.1" AND EXISTS "${CMAKE_SOURCE_DIR}/docs/json2msgpack.1")
+    # install pre-generated pages
+    message(STATUS "Found pre-generated man pages: docs/msgpack2json.1 docs/json2msgpack.1")
+    install(FILES ${CMAKE_SOURCE_DIR}/docs/msgpack2json.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
+    install(FILES ${CMAKE_SOURCE_DIR}/docs/json2msgpack.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1)
+else()
+
+    # try to find md2man-roff
+    find_program(MD2MAN-ROFF md2man-roff)
+    if(MD2MAN-ROFF STREQUAL "MD2MAN-ROFF-NOTFOUND")
+        message(WARNING "\nmd2man-roff is not installed. Man pages will not be created!\nSee: https://github.com/sunaku/md2man")
+    else()
+
+        # add custom commands to build man pages
+        # cmake is insanely verbose for creating custom builders
+
+        message(STATUS "Found md2man-roff: ${MD2MAN-ROFF}")
+        add_custom_command(
+            OUTPUT ${CMAKE_BINARY_DIR}/msgpack2json.1
+            MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/docs/msgpack2json.md
+            COMMAND cat ${CMAKE_SOURCE_DIR}/docs/msgpack2json.md | sed "s/\$version/${PROJECT_VERSION}/" | ${MD2MAN-ROFF} > ${CMAKE_BINARY_DIR}/msgpack2json.1
+            VERBATIM)
+        add_custom_target(msgpack2json-man DEPENDS ${CMAKE_BINARY_DIR}/msgpack2json.1)
+        add_dependencies(msgpack2json msgpack2json-man)
+        install(FILES ${CMAKE_BINARY_DIR}/msgpack2json.1 DESTINATION share/man/man1)
+
+        add_custom_command(
+            OUTPUT ${CMAKE_BINARY_DIR}/json2msgpack.1
+            MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/docs/json2msgpack.md
+            COMMAND cat ${CMAKE_SOURCE_DIR}/docs/json2msgpack.md | sed "s/\$version/${PROJECT_VERSION}/" | ${MD2MAN-ROFF} > ${CMAKE_BINARY_DIR}/json2msgpack.1
+            VERBATIM)
+        add_custom_target(json2msgpack-man DEPENDS ${CMAKE_BINARY_DIR}/json2msgpack.1)
+        add_dependencies(json2msgpack json2msgpack-man)
+        install(FILES ${CMAKE_BINARY_DIR}/json2msgpack.1 DESTINATION share/man/man1)
+
+    endif()
 endif()
 
 
@@ -148,5 +211,23 @@ add_test("json2msgpack-base64-detect-bin-one" ${COMPARE} ${TESTS_DIR}/base64-bin
 add_test("json2msgpack-base64-mixed-partial"  ${COMPARE} ${TESTS_DIR}/base64-partial-ext.mp ${VALGRIND} ./json2msgpack -bB 50 -i ${TESTS_DIR}/base64-mixed.json)
 add_test("json2msgpack-base64-mixed-bin"      ${COMPARE} ${TESTS_DIR}/base64-bin-ext.mp     ${VALGRIND} ./json2msgpack -bB 22 -i ${TESTS_DIR}/base64-mixed.json)
 
-#add_test("json2msgpack-base64-bin" ${COMPARE_SCRIPT} ${TESTS_DIR}/base64-bin.mp valgrind ./json2msgpack -bi ${TESTS_DIR}/base64-prefix.json)
-#add_test("json2msgpack-base64-bin-lax" ${COMPARE_SCRIPT} ${TESTS_DIR}/base64-bin.mp valgrind ./json2msgpack -lbi ${TESTS_DIR}/base64-prefix-lax.json)
+add_test("json2msgpack-value-string"          ${COMPARE} ${TESTS_DIR}/value-string.mp       ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/value-string.json)
+add_test("json2msgpack-value-int"             ${COMPARE} ${TESTS_DIR}/value-int.mp          ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/value-int.json)
+add_test("msgpack2json-value-string"          ${COMPARE} ${TESTS_DIR}/value-string.json     ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/value-string.mp)
+add_test("msgpack2json-value-int"             ${COMPARE} ${TESTS_DIR}/value-int.json        ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/value-int.mp)
+
+
+# packaging
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND EXISTS "/etc/debian_version")
+    message(STATUS "Debian-based Linux OS detected")
+    set(CPACK_GENERATOR "DEB")
+    set(CPACK_PACKAGE_NAME "msgpack-tools")
+    set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+    set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${PROJECT_VERSION}-${CMAKE_SYSTEM_PROCESSOR}" )
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/ludocode/msgpack-tools")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Jerry Jacobs")
+    set(CPACK_PACKAGE_CONTACT "jerry.jacobs@xor-gate.org")
+    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "Command-line tools for converting between MessagePack and JSON")
+    include(CPack)
+endif()

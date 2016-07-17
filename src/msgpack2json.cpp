@@ -145,17 +145,11 @@ static bool base64_ext(mpack_reader_t* reader, WriterType& writer, options_t* op
 }
 
 template <class WriterType>
-static bool element(mpack_reader_t* reader, WriterType& writer, options_t* options, int depth) {
+static bool element(mpack_reader_t* reader, WriterType& writer, options_t* options) {
     const mpack_tag_t tag = mpack_read_tag(reader);
     if (mpack_reader_error(reader) != mpack_ok)
         return false;
 
-    if (!options->debug && depth == 0 && (tag.type != mpack_type_map && tag.type != mpack_type_array)) {
-        fprintf(stderr, "%s: Top-level object must be a map or array. Try debug viewing mode (-d)\n", options->command);
-        return false;
-    }
-
-    // TODO check not depth zero
     switch (tag.type) {
         case mpack_type_bool:   return writer.Bool(tag.v.b);
         case mpack_type_nil:    return writer.Null();
@@ -199,7 +193,7 @@ static bool element(mpack_reader_t* reader, WriterType& writer, options_t* optio
             if (!writer.StartArray())
                 return false;
             for (size_t i = 0; i < tag.v.l; ++i)
-                if (!element(reader, writer, options, depth + 1))
+                if (!element(reader, writer, options))
                     return false;
             mpack_done_array(reader);
             return writer.EndArray();
@@ -210,7 +204,7 @@ static bool element(mpack_reader_t* reader, WriterType& writer, options_t* optio
             for (size_t i = 0; i < tag.v.l; ++i) {
 
                 if (options->debug) {
-                    element(reader, writer, options, depth + 1);
+                    element(reader, writer, options);
                 } else {
                     uint32_t len = mpack_expect_str(reader);
                     if (mpack_reader_error(reader) != mpack_ok) {
@@ -221,7 +215,7 @@ static bool element(mpack_reader_t* reader, WriterType& writer, options_t* optio
                         return false;
                 }
 
-                if (!element(reader, writer, options, depth + 1))
+                if (!element(reader, writer, options))
                     return false;
             }
             mpack_done_map(reader);
@@ -261,19 +255,27 @@ static bool convert(options_t* options) {
     mpack_reader_set_fill(&reader, fill);
     mpack_reader_set_context(&reader, in_file);
 
-    char* buffer = (char*)malloc(65536);
-    FileWriteStream stream(out_file, buffer, sizeof(buffer));
-
     bool ret;
-    if (options->pretty) {
-        PrettyWriter<FileWriteStream> writer(stream);
-        ret = element(&reader, writer, options, 0);
-        // RapidJSON's PrettyWriter does not add a final
-        // newline at the end of the JSON
-        putc('\n', out_file);
-    } else {
-        Writer<FileWriteStream> writer(stream);
-        ret = element(&reader, writer, options, 0);
+    char* buffer = (char*)malloc(BUFFER_SIZE);
+    {
+        FileWriteStream stream(out_file, buffer, BUFFER_SIZE);
+
+        if (options->pretty) {
+            PrettyWriter<FileWriteStream> writer(stream);
+            ret = element(&reader, writer, options);
+
+            // RapidJSON's PrettyWriter does not add a final
+            // newline at the end of the JSON
+            putc('\n', out_file);
+
+        } else {
+            Writer<FileWriteStream> writer(stream);
+            ret = element(&reader, writer, options);
+        }
+
+        // Writer/FileWriteStream do not flush when writing standalone values:
+        //     https://github.com/miloyip/rapidjson/issues/684
+        stream.Flush();
     }
 
     free(buffer);

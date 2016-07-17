@@ -223,8 +223,9 @@ static bool output(options_t* options, Document& document) {
         out_file = stdout;
     }
 
+    char* buffer = (char*)malloc(BUFFER_SIZE);
     mpack_writer_t writer;
-    mpack_writer_init_stack(&writer);
+    mpack_writer_init(&writer, buffer, BUFFER_SIZE);
     mpack_writer_set_context(&writer, out_file);
     mpack_writer_set_flush(&writer, flush);
 
@@ -233,6 +234,7 @@ static bool output(options_t* options, Document& document) {
     mpack_error_t error = mpack_writer_destroy(&writer);
     if (out_file != stdout)
         fclose(out_file);
+    free(buffer);
     return error == mpack_ok;
 }
 

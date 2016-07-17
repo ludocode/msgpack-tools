@@ -39,6 +39,6 @@ extern "C" {
 #include "b64/cencode.h"
 }
 
-#define VERSION "0.4"
+#define BUFFER_SIZE 65536
 
 #endif

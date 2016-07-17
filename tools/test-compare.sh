@@ -12,4 +12,4 @@ if [ $RESULT -ne 0 ]; then
     exit 1
 fi
 
-diff "$EXPECTED" "test-out.tmp"
+diff -u "$EXPECTED" "test-out.tmp"
