@@ -1,3 +1,14 @@
+msgpack-tools v0.6
+------------------
+
+New features:
+
+- Added `msgpack2json` continuous mode (`-c` and `-C`) to convert a stream of top-level objects (#4)
+
+Bug fixes:
+
+- Fixed a bug that could cause a newline to be printed incorrectly in pretty-printing mode
+
 msgpack-tools v0.5
 ------------------
 

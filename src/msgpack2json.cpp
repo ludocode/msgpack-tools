@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2016 Nicholas Fraser
+ * Copyright (c) 2015-2017 Nicholas Fraser
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,19 +35,22 @@
 
 using namespace rapidjson;
 
+typedef enum continuous_mode_t {
+    continuous_off = 0,
+    continuous_undelimited,
+    continuous_commas,
+} continuous_mode_t;
+
 typedef struct options_t {
     const char* command;
     const char* out_filename;
     const char* in_filename;
+    continuous_mode_t continuous_mode;
     bool debug;
     bool pretty;
     bool base64;
     bool base64_prefix;
 } options_t;
-
-static size_t fill(mpack_reader_t* reader, char* buffer, size_t count) {
-    return fread((void*)buffer, 1, count, (FILE*)reader->context);
-}
 
 // Reads MessagePack string bytes and outputs a JSON string
 template <class WriterType>
@@ -225,35 +228,52 @@ static bool element(mpack_reader_t* reader, WriterType& writer, options_t* optio
     return true;
 }
 
-static bool convert(options_t* options) {
-    FILE* in_file;
-    if (options->in_filename) {
-        in_file = fopen(options->in_filename, "rb");
-        if (in_file == NULL) {
-            fprintf(stderr, "%s: could not open \"%s\" for reading.\n", options->command, options->in_filename);
+template <class WriterType>
+static bool convert_all_elements(mpack_reader_t* reader, WriterType& writer, FileWriteStream& stream, options_t* options) {
+    do {
+        // Convert an element
+        if (!element(reader, writer, options))
             return false;
-        }
-    } else {
-        in_file = stdin;
-    }
 
+        // If we're not in continuous mode, we're done
+        if (options->continuous_mode == continuous_off)
+            return true;
+
+        // See if there's more. An EOF error at this point is OK since we're
+        // between elements. EOF at any other time fails conversion.
+        mpack_peek_tag(reader);
+        if (mpack_reader_error(reader) == mpack_error_eof)
+            return true;
+
+        // Output a delimiter
+        if (options->continuous_mode == continuous_commas)
+            stream.Put(',');
+        if (options->pretty)
+            stream.Put('\n');
+    } while (true);
+}
+
+static bool convert(options_t* options) {
+
+    // Open input file with MPack
+    mpack_reader_t reader;
+    if (options->in_filename)
+        mpack_reader_init_file(&reader, options->in_filename);
+    else
+        mpack_reader_init_stdfile(&reader, stdin, true);
+
+    // Open output file for RapidJSON
     static FILE* out_file = NULL;
     if (options->out_filename) {
         out_file = fopen(options->out_filename, "wb");
         if (out_file == NULL) {
             fprintf(stderr, "%s: could not open \"%s\" for writing.\n", options->command, options->out_filename);
-            if (in_file != stdin)
-                fclose(in_file);
+            mpack_reader_destroy(&reader);
             return false;
         }
     } else {
         out_file = stdout;
     }
-
-    mpack_reader_t reader;
-    mpack_reader_init_stack(&reader);
-    mpack_reader_set_fill(&reader, fill);
-    mpack_reader_set_context(&reader, in_file);
 
     bool ret;
     char* buffer = (char*)malloc(BUFFER_SIZE);
@@ -261,33 +281,29 @@ static bool convert(options_t* options) {
         FileWriteStream stream(out_file, buffer, BUFFER_SIZE);
 
         if (options->pretty) {
-            PrettyWriter<FileWriteStream> writer(stream);
-            ret = element(&reader, writer, options);
+            {
+                PrettyWriter<FileWriteStream> writer(stream);
+                ret = convert_all_elements(&reader, writer, stream, options);
+            }
 
             // RapidJSON's PrettyWriter does not add a final
             // newline at the end of the JSON
-            putc('\n', out_file);
+            stream.Put('\n');
+            stream.Flush();
 
         } else {
             Writer<FileWriteStream> writer(stream);
-            ret = element(&reader, writer, options);
+            ret = convert_all_elements(&reader, writer, stream, options);
         }
-
-        // Writer/FileWriteStream do not flush when writing standalone values:
-        //     https://github.com/miloyip/rapidjson/issues/684
-        stream.Flush();
     }
 
     free(buffer);
     mpack_error_t error = mpack_reader_destroy(&reader);
+    fclose(out_file);
 
-    if (out_file != stdout)
-        fclose(out_file);
-    if (in_file != stdin)
-        fclose(in_file);
-
-    if (!ret || error != mpack_ok)
-        fprintf(stderr, "%s: parse error %i\n", options->command, (int)error);
+    if (!ret)
+        fprintf(stderr, "%s: parse error: %s (%i)\n", options->command,
+                mpack_error_to_string(error), (int)error);
     return ret;
 }
 
@@ -300,6 +316,8 @@ static void usage(const char* command) {
     fprintf(stderr, "    -p  Output pretty-printed JSON\n");
     fprintf(stderr, "    -b  Convert bin to base64 string with \"base64:\" prefix\n");
     fprintf(stderr, "    -B  Convert bin to base64 string with no prefix\n");
+    fprintf(stderr, "    -c  Continuous mode, no delimiter");
+    fprintf(stderr, "    -C  Continuous mode, comma delimited");
     fprintf(stderr, "    -h  Print this help\n");
     fprintf(stderr, "    -v  Print version information\n");
     fprintf(stderr, "For viewing MessagePack, you probably want -d or -di <filename>.\n");
@@ -319,7 +337,7 @@ int main(int argc, char** argv) {
 
     opterr = 0;
     int opt;
-    while ((opt = getopt(argc, argv, "i:o:dpbBhv?")) != -1) {
+    while ((opt = getopt(argc, argv, "i:o:dpbBcChv?")) != -1) {
         switch (opt) {
             case 'i':
                 options.in_filename = optarg;
@@ -341,6 +359,22 @@ int main(int argc, char** argv) {
             case 'B':
                 options.base64 = true;
                 options.base64_prefix = false;
+                break;
+            case 'c':
+                if (options.continuous_mode == continuous_commas) {
+                    fprintf(stderr, "You cannot specify both -c and -C.\n");
+                    usage(options.command);
+                    return EXIT_FAILURE;
+                }
+                options.continuous_mode = continuous_undelimited;
+                break;
+            case 'C':
+                if (options.continuous_mode == continuous_undelimited) {
+                    fprintf(stderr, "You cannot specify both -c and -C.\n");
+                    usage(options.command);
+                    return EXIT_FAILURE;
+                }
+                options.continuous_mode = continuous_commas;
                 break;
             case 'h':
                 usage(options.command);

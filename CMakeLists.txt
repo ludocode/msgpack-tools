@@ -6,9 +6,8 @@ include(CheckCXXCompilerFlag)
 
 project(msgpack2json)
 
-# compat with cmake > 3.0, this should be autodetected with the git command (tag) or a released file
 set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 5)
+set(PROJECT_VERSION_MINOR 6)
 set(PROJECT_VERSION_PATCH 0)
 
 if(PROJECT_VERSION_PATCH STREQUAL "0")
@@ -43,8 +42,8 @@ else()
     set(CXX_FLAGS   "")
 endif()
 
-set(MPACK_COMMIT "8c13a0d7f8a1232a189634768b94740861cbaf3e")
-set(RAPIDJSON_COMMIT "369de87e5d7da05786731a712f25ab9b46c4b0ce")
+set(MPACK_COMMIT "df17e83f0fa8571b9cd0d8ccf38144fa90e244d1")
+set(RAPIDJSON_COMMIT "99ba17bd66a85ec64a2f322b68c2b9c3b77a4391")
 set(LIBB64_VERSION "1.2.1")
 
 if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
@@ -189,32 +188,38 @@ set(FAIL "${CMAKE_SOURCE_DIR}/tools/test-fail.sh")
 
 enable_testing()
 
-add_test("json2msgpack-basic"                 ${COMPARE} ${TESTS_DIR}/basic.mp              ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/basic.json)
-add_test("json2msgpack-basic-min"             ${COMPARE} ${TESTS_DIR}/basic.mp              ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/basic-min.json)
-add_test("json2msgpack-basic-lax"             ${COMPARE} ${TESTS_DIR}/basic.mp              ${VALGRIND} ./json2msgpack -li ${TESTS_DIR}/basic-lax.json)
-add_test("json2msgpack-basic-base64"          ${COMPARE} ${TESTS_DIR}/basic.mp              ${VALGRIND} ./json2msgpack -B 22 -bi ${TESTS_DIR}/basic.json)
-add_test("json2msgpack-basic-strict-fail"     ${FAIL}                                       ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/basic-lax.json)
+add_test("json2msgpack-basic"                 ${COMPARE} ${TESTS_DIR}/basic.mp                     ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/basic.json)
+add_test("json2msgpack-basic-min"             ${COMPARE} ${TESTS_DIR}/basic.mp                     ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/basic-min.json)
+add_test("json2msgpack-basic-lax"             ${COMPARE} ${TESTS_DIR}/basic.mp                     ${VALGRIND} ./json2msgpack -li ${TESTS_DIR}/basic-lax.json)
+add_test("json2msgpack-basic-base64"          ${COMPARE} ${TESTS_DIR}/basic.mp                     ${VALGRIND} ./json2msgpack -B 22 -bi ${TESTS_DIR}/basic.json)
+add_test("json2msgpack-basic-strict-fail"     ${FAIL}                                              ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/basic-lax.json)
 
-add_test("msgpack2json-basic-min"             ${COMPARE} ${TESTS_DIR}/basic-min.json        ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/basic.mp)
-add_test("msgpack2json-basic"                 ${COMPARE} ${TESTS_DIR}/basic.json            ${VALGRIND} ./msgpack2json -pi ${TESTS_DIR}/basic.mp)
-add_test("msgpack2json-basic-debug"           ${COMPARE} ${TESTS_DIR}/basic.json            ${VALGRIND} ./msgpack2json -di ${TESTS_DIR}/basic.mp)
+add_test("msgpack2json-basic-min"             ${COMPARE} ${TESTS_DIR}/basic-min.json               ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/basic.mp)
+add_test("msgpack2json-basic"                 ${COMPARE} ${TESTS_DIR}/basic.json                   ${VALGRIND} ./msgpack2json -pi ${TESTS_DIR}/basic.mp)
+add_test("msgpack2json-basic-debug"           ${COMPARE} ${TESTS_DIR}/basic.json                   ${VALGRIND} ./msgpack2json -di ${TESTS_DIR}/basic.mp)
+add_test("msgpack2json-stdin"                 ${COMPARE} ${TESTS_DIR}/basic.json                   bash -c "cat ${TESTS_DIR}/basic.mp | ${VALGRIND} ./msgpack2json -p")
 
-add_test("json2msgpack-base64-str-prefix"     ${COMPARE} ${TESTS_DIR}/base64-str-prefix.mp  ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/base64-prefix.json)
-add_test("json2msgpack-base64-bin"            ${COMPARE} ${TESTS_DIR}/base64-bin-ext.mp     ${VALGRIND} ./json2msgpack -bi ${TESTS_DIR}/base64-prefix.json)
-add_test("json2msgpack-base64-bin-lax"        ${COMPARE} ${TESTS_DIR}/base64-bin-ext.mp     ${VALGRIND} ./json2msgpack -bli ${TESTS_DIR}/base64-prefix-lax.json)
+add_test("json2msgpack-base64-str-prefix"     ${COMPARE} ${TESTS_DIR}/base64-str-prefix.mp         ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/base64-prefix.json)
+add_test("json2msgpack-base64-bin"            ${COMPARE} ${TESTS_DIR}/base64-bin-ext.mp            ${VALGRIND} ./json2msgpack -bi ${TESTS_DIR}/base64-prefix.json)
+add_test("json2msgpack-base64-bin-lax"        ${COMPARE} ${TESTS_DIR}/base64-bin-ext.mp            ${VALGRIND} ./json2msgpack -bli ${TESTS_DIR}/base64-prefix-lax.json)
 
-add_test("json2msgpack-base64-detect-str"     ${COMPARE} ${TESTS_DIR}/base64-str.mp         ${VALGRIND} ./json2msgpack -B 200 -i ${TESTS_DIR}/base64-detect.json)
-add_test("json2msgpack-base64-detect-partial" ${COMPARE} ${TESTS_DIR}/base64-partial.mp     ${VALGRIND} ./json2msgpack -B 50 -i ${TESTS_DIR}/base64-detect.json)
-add_test("json2msgpack-base64-detect-bin"     ${COMPARE} ${TESTS_DIR}/base64-bin.mp         ${VALGRIND} ./json2msgpack -B 22 -i ${TESTS_DIR}/base64-detect.json)
-add_test("json2msgpack-base64-detect-bin-one" ${COMPARE} ${TESTS_DIR}/base64-bin.mp         ${VALGRIND} ./json2msgpack -B 1 -i ${TESTS_DIR}/base64-detect.json)
+add_test("json2msgpack-base64-detect-str"     ${COMPARE} ${TESTS_DIR}/base64-str.mp                ${VALGRIND} ./json2msgpack -B 200 -i ${TESTS_DIR}/base64-detect.json)
+add_test("json2msgpack-base64-detect-partial" ${COMPARE} ${TESTS_DIR}/base64-partial.mp            ${VALGRIND} ./json2msgpack -B 50 -i ${TESTS_DIR}/base64-detect.json)
+add_test("json2msgpack-base64-detect-bin"     ${COMPARE} ${TESTS_DIR}/base64-bin.mp                ${VALGRIND} ./json2msgpack -B 22 -i ${TESTS_DIR}/base64-detect.json)
+add_test("json2msgpack-base64-detect-bin-one" ${COMPARE} ${TESTS_DIR}/base64-bin.mp                ${VALGRIND} ./json2msgpack -B 1 -i ${TESTS_DIR}/base64-detect.json)
 
-add_test("json2msgpack-base64-mixed-partial"  ${COMPARE} ${TESTS_DIR}/base64-partial-ext.mp ${VALGRIND} ./json2msgpack -bB 50 -i ${TESTS_DIR}/base64-mixed.json)
-add_test("json2msgpack-base64-mixed-bin"      ${COMPARE} ${TESTS_DIR}/base64-bin-ext.mp     ${VALGRIND} ./json2msgpack -bB 22 -i ${TESTS_DIR}/base64-mixed.json)
+add_test("json2msgpack-base64-mixed-partial"  ${COMPARE} ${TESTS_DIR}/base64-partial-ext.mp        ${VALGRIND} ./json2msgpack -bB 50 -i ${TESTS_DIR}/base64-mixed.json)
+add_test("json2msgpack-base64-mixed-bin"      ${COMPARE} ${TESTS_DIR}/base64-bin-ext.mp            ${VALGRIND} ./json2msgpack -bB 22 -i ${TESTS_DIR}/base64-mixed.json)
 
-add_test("json2msgpack-value-string"          ${COMPARE} ${TESTS_DIR}/value-string.mp       ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/value-string.json)
-add_test("json2msgpack-value-int"             ${COMPARE} ${TESTS_DIR}/value-int.mp          ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/value-int.json)
-add_test("msgpack2json-value-string"          ${COMPARE} ${TESTS_DIR}/value-string.json     ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/value-string.mp)
-add_test("msgpack2json-value-int"             ${COMPARE} ${TESTS_DIR}/value-int.json        ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/value-int.mp)
+add_test("json2msgpack-value-string"          ${COMPARE} ${TESTS_DIR}/value-string.mp              ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/value-string.json)
+add_test("json2msgpack-value-int"             ${COMPARE} ${TESTS_DIR}/value-int.mp                 ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/value-int.json)
+add_test("msgpack2json-value-string"          ${COMPARE} ${TESTS_DIR}/value-string.json            ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/value-string.mp)
+add_test("msgpack2json-value-int"             ${COMPARE} ${TESTS_DIR}/value-int.json               ${VALGRIND} ./msgpack2json -i ${TESTS_DIR}/value-int.mp)
+
+add_test("msgpack2json-continuous-single"     ${COMPARE} ${TESTS_DIR}/basic-min.json               ${VALGRIND} ./msgpack2json -ci ${TESTS_DIR}/basic.mp)
+add_test("msgpack2json-continuous"            ${COMPARE} ${TESTS_DIR}/continuous.json              ${VALGRIND} ./msgpack2json -cpi ${TESTS_DIR}/continuous.mp)
+add_test("msgpack2json-continuous-commas"     ${COMPARE} ${TESTS_DIR}/continuous-commas.json       ${VALGRIND} ./msgpack2json -Cpi ${TESTS_DIR}/continuous.mp)
+add_test("msgpack2json-continuous-commas-min" ${COMPARE} ${TESTS_DIR}/continuous-commas-min.json   ${VALGRIND} ./msgpack2json -Ci ${TESTS_DIR}/continuous.mp)
 
 
 # packaging

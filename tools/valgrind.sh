@@ -1,4 +1,11 @@
 #!/bin/bash
+
+# If we have no valgrind, we just run without it.
+if ! which valgrind &> /dev/null; then
+    "$@"
+    exit $?
+fi
+
 # The arguments are the command to run under valgrind.
 VALGRIND_COMMAND="valgrind --leak-check=full --error-exitcode=2"
 
