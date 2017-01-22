@@ -38,11 +38,6 @@ typedef struct options_t {
     size_t base64_min_bytes;
 } options_t;
 
-static void flush(mpack_writer_t* writer, const char* buffer, size_t count) {
-    if (fwrite(buffer, 1, count, (FILE*)writer->context) != count)
-        mpack_writer_flag_error(writer, mpack_error_io);
-}
-
 static const char* prefix_ext    = "ext:";
 static const char* prefix_base64 = "base64:";
 
@@ -212,30 +207,20 @@ static bool write_value(options_t* options, Value& value, mpack_writer_t* writer
 }
 
 static bool output(options_t* options, Document& document) {
-    FILE* out_file;
-    if (options->out_filename) {
-        out_file = fopen(options->out_filename, "wb");
-        if (out_file == NULL) {
-            fprintf(stderr, "%s: could not open \"%s\" for writing.\n", options->command, options->out_filename);
-            return false;
-        }
-    } else {
-        out_file = stdout;
-    }
-
-    char* buffer = (char*)malloc(BUFFER_SIZE);
     mpack_writer_t writer;
-    mpack_writer_init(&writer, buffer, BUFFER_SIZE);
-    mpack_writer_set_context(&writer, out_file);
-    mpack_writer_set_flush(&writer, flush);
+    if (options->out_filename != NULL)
+        mpack_writer_init_file(&writer, options->out_filename);
+    else
+        mpack_writer_init_stdfile(&writer, stdout, true);
 
     write_value(options, document, &writer);
 
     mpack_error_t error = mpack_writer_destroy(&writer);
-    if (out_file != stdout)
-        fclose(out_file);
-    free(buffer);
-    return error == mpack_ok;
+    if (error != mpack_ok) {
+        fprintf(stderr, "%s: error writing MessagePack: %s (%i)\n", options->command,
+                mpack_error_to_string(error), (int)error);
+    }
+    return true;
 }
 
 static bool load_file(options_t* options, char** out_data, size_t* out_size) {
@@ -301,8 +286,7 @@ static bool load_file(options_t* options, char** out_data, size_t* out_size) {
 
     data[size] = '\0';
 
-    if (in_file != stdin)
-        fclose(in_file);
+    fclose(in_file);
     *out_data = data;
     *out_size = size;
     return true;

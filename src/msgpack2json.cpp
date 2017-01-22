@@ -52,14 +52,6 @@ typedef struct options_t {
     bool base64_prefix;
 } options_t;
 
-static size_t fill(mpack_reader_t* reader, char* buffer, size_t count) {
-    if (feof((FILE *)reader->context)) {
-       mpack_reader_flag_error(reader, mpack_error_eof);
-       return 0;
-    }
-    return fread((void*)buffer, 1, count, (FILE*)reader->context);
-}
-
 // Reads MessagePack string bytes and outputs a JSON string
 template <class WriterType>
 static bool string(mpack_reader_t* reader, WriterType& writer, options_t* options, uint32_t len) {
@@ -262,34 +254,26 @@ static bool convert_all_elements(mpack_reader_t* reader, WriterType& writer, Fil
 }
 
 static bool convert(options_t* options) {
-    FILE* in_file;
-    if (options->in_filename) {
-        in_file = fopen(options->in_filename, "rb");
-        if (in_file == NULL) {
-            fprintf(stderr, "%s: could not open \"%s\" for reading.\n", options->command, options->in_filename);
-            return false;
-        }
-    } else {
-        in_file = stdin;
-    }
 
+    // Open input file with MPack
+    mpack_reader_t reader;
+    if (options->in_filename)
+        mpack_reader_init_file(&reader, options->in_filename);
+    else
+        mpack_reader_init_stdfile(&reader, stdin, true);
+
+    // Open output file for RapidJSON
     static FILE* out_file = NULL;
     if (options->out_filename) {
         out_file = fopen(options->out_filename, "wb");
         if (out_file == NULL) {
             fprintf(stderr, "%s: could not open \"%s\" for writing.\n", options->command, options->out_filename);
-            if (in_file != stdin)
-                fclose(in_file);
+            mpack_reader_destroy(&reader);
             return false;
         }
     } else {
         out_file = stdout;
     }
-
-    mpack_reader_t reader;
-    mpack_reader_init_stack(&reader);
-    mpack_reader_set_fill(&reader, fill);
-    mpack_reader_set_context(&reader, in_file);
 
     bool ret;
     char* buffer = (char*)malloc(BUFFER_SIZE);
@@ -315,11 +299,7 @@ static bool convert(options_t* options) {
 
     free(buffer);
     mpack_error_t error = mpack_reader_destroy(&reader);
-
-    if (out_file != stdout)
-        fclose(out_file);
-    if (in_file != stdin)
-        fclose(in_file);
+    fclose(out_file);
 
     if (!ret)
         fprintf(stderr, "%s: parse error: %s (%i)\n", options->command,
