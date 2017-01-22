@@ -1,5 +1,5 @@
-Unreleased
-----------
+msgpack-tools v0.6
+------------------
 
 New features:
 

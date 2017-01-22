@@ -6,9 +6,8 @@ include(CheckCXXCompilerFlag)
 
 project(msgpack2json)
 
-# compat with cmake > 3.0, this should be autodetected with the git command (tag) or a released file
 set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 5)
+set(PROJECT_VERSION_MINOR 6)
 set(PROJECT_VERSION_PATCH 0)
 
 if(PROJECT_VERSION_PATCH STREQUAL "0")
