@@ -50,6 +50,12 @@ OPTIONS
 
   Ext objects will be converted to base64 strings with an "`ext:`*#*`:base64:`" prefix.
 
+`-c`
+  Continuous mode. The input can contain any number of top-level objects instead of just one. Each object is output as JSON with no delimiter (other than a newline in pretty-printing mode.)
+
+`-C`
+  Continuous mode, delimited by commas. The input can contain any number of top-level objects instead of just one. Each object is output as JSON, delimited by commas (and a newline in pretty-printing mode.) This can be used to construct a JSON array containing all input objects by wrapping it in square brackets.
+
 `-h`
   Print usage.
 
