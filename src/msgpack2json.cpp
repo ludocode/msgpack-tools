@@ -37,14 +37,14 @@ using namespace rapidjson;
 
 typedef enum continuous_mode_t {
     continuous_off = 0,
-    continuous_undelimited,
-    continuous_commas,
+    continuous_on,
 } continuous_mode_t;
 
 typedef struct options_t {
     const char* command;
     const char* out_filename;
     const char* in_filename;
+    const char* continuous_mode_delimiter;
     continuous_mode_t continuous_mode;
     bool debug;
     bool pretty;
@@ -245,9 +245,7 @@ static bool convert_all_elements(mpack_reader_t* reader, WriterType& writer, Fil
         if (mpack_reader_error(reader) == mpack_error_eof)
             return true;
 
-        // Output a delimiter
-        if (options->continuous_mode == continuous_commas)
-            stream.Put(',');
+        stream.Put(*(options->continuous_mode_delimiter));
         if (options->pretty)
             stream.Put('\n');
     } while (true);
@@ -308,7 +306,7 @@ static bool convert(options_t* options) {
 }
 
 static void usage(const char* command) {
-    fprintf(stderr, "Usage: %s [-dpbB] [-i <infile>] [-o <outfile>]\n", command);
+    fprintf(stderr, "Usage: %s [-cCdpbB] [-i <infile>] [-o <outfile>]\n", command);
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "    -i <infile>  Input filename (default stdin)\n");
     fprintf(stderr, "    -o <outfile>  Output filename (default stdout)\n");
@@ -316,8 +314,9 @@ static void usage(const char* command) {
     fprintf(stderr, "    -p  Output pretty-printed JSON\n");
     fprintf(stderr, "    -b  Convert bin to base64 string with \"base64:\" prefix\n");
     fprintf(stderr, "    -B  Convert bin to base64 string with no prefix\n");
-    fprintf(stderr, "    -c  Continuous mode, no delimiter");
-    fprintf(stderr, "    -C  Continuous mode, comma delimited");
+    fprintf(stderr, "    -c  Continuous mode, no delimiter\n");
+    fprintf(stderr, "    -C  Continuous mode, comma delimited\n");
+    fprintf(stderr, "    -D <delim> Set continuous mode delimiter character\n");
     fprintf(stderr, "    -h  Print this help\n");
     fprintf(stderr, "    -v  Print version information\n");
     fprintf(stderr, "For viewing MessagePack, you probably want -d or -di <filename>.\n");
@@ -334,10 +333,11 @@ int main(int argc, char** argv) {
     options_t options;
     memset(&options, 0, sizeof(options));
     options.command = argv[0];
+    options.continuous_mode_delimiter = "";
 
     opterr = 0;
     int opt;
-    while ((opt = getopt(argc, argv, "i:o:dpbBcChv?")) != -1) {
+    while ((opt = getopt(argc, argv, "i:o:dpbBcCD:hv?")) != -1) {
         switch (opt) {
             case 'i':
                 options.in_filename = optarg;
@@ -361,20 +361,16 @@ int main(int argc, char** argv) {
                 options.base64_prefix = false;
                 break;
             case 'c':
-                if (options.continuous_mode == continuous_commas) {
-                    fprintf(stderr, "You cannot specify both -c and -C.\n");
-                    usage(options.command);
-                    return EXIT_FAILURE;
-                }
-                options.continuous_mode = continuous_undelimited;
+                options.continuous_mode_delimiter = "";
+                options.continuous_mode = continuous_on;
                 break;
             case 'C':
-                if (options.continuous_mode == continuous_undelimited) {
-                    fprintf(stderr, "You cannot specify both -c and -C.\n");
-                    usage(options.command);
-                    return EXIT_FAILURE;
-                }
-                options.continuous_mode = continuous_commas;
+                options.continuous_mode_delimiter = ",";
+                options.continuous_mode = continuous_on;
+                break;
+            case 'D':
+                options.continuous_mode_delimiter = optarg;
+                options.continuous_mode = continuous_on;
                 break;
             case 'h':
                 usage(options.command);
