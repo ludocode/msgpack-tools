@@ -175,6 +175,7 @@ static bool element(mpack_reader_t* reader, WriterType& writer, options_t* optio
                 return writer.RawValue(buf, strlen(buf), kStringType);
             } else {
                 fprintf(stderr, "%s: bin unencodable in JSON. Try debug viewing mode (-d)\n", options->command);
+                mpack_reader_flag_error(reader, mpack_error_data);
                 return false;
             }
 
@@ -189,6 +190,7 @@ static bool element(mpack_reader_t* reader, WriterType& writer, options_t* optio
                 return writer.RawValue(buf, strlen(buf), kStringType);
             } else {
                 fprintf(stderr, "%s: ext type %i unencodable in JSON. Try debug viewing mode (-d)\n", options->command, tag.exttype);
+                mpack_reader_flag_error(reader, mpack_error_data);
                 return false;
             }
 
@@ -212,6 +214,7 @@ static bool element(mpack_reader_t* reader, WriterType& writer, options_t* optio
                     uint32_t len = mpack_expect_str(reader);
                     if (mpack_reader_error(reader) != mpack_ok) {
                         fprintf(stderr, "%s: map key is not a string. Try debug viewing mode (-d)\n", options->command);
+                        mpack_reader_flag_error(reader, mpack_error_data);
                         return false;
                     }
                     if (!string(reader, writer, options, len))
