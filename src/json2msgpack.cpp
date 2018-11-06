@@ -206,23 +206,6 @@ static bool write_value(options_t* options, Value& value, mpack_writer_t* writer
     return mpack_writer_error(writer) == mpack_ok;
 }
 
-static bool output(options_t* options, Document& document) {
-    mpack_writer_t writer;
-    if (options->out_filename != NULL)
-        mpack_writer_init_file(&writer, options->out_filename);
-    else
-        mpack_writer_init_stdfile(&writer, stdout, true);
-
-    write_value(options, document, &writer);
-
-    mpack_error_t error = mpack_writer_destroy(&writer);
-    if (error != mpack_ok) {
-        fprintf(stderr, "%s: error writing MessagePack: %s (%i)\n", options->command,
-                mpack_error_to_string(error), (int)error);
-    }
-    return true;
-}
-
 static bool load_file(options_t* options, char** out_data, size_t* out_size) {
     FILE* in_file;
     if (options->in_filename) {
@@ -299,22 +282,48 @@ static bool convert(options_t* options) {
         return false;
 
     // The data has been null-terminated by load_file()
-    Document document;
-    if (options->lax)
-        document.ParseInsitu<kParseFullPrecisionFlag | kParseCommentsFlag | kParseTrailingCommasFlag>(data);
-    else
-        document.ParseInsitu<kParseFullPrecisionFlag>(data);
+    StringStream stream(data);
 
-    if (document.HasParseError()) {
-        fprintf(stderr, "%s: error parsing JSON at offset %i:\n    %s\n", options->command,
-                (int)document.GetErrorOffset(), GetParseError_En(document.GetParseError()));
+    mpack_writer_t writer;
+    if (options->out_filename != NULL)
+        mpack_writer_init_file(&writer, options->out_filename);
+    else
+        mpack_writer_init_stdfile(&writer, stdout, true);
+
+    while (stream.Peek() != '\0') {
+        // skip space characters
+        while (isspace(stream.Peek()))
+            stream.Take();
+        if (stream.Peek() == '\0')
+            break;
+
+        Document document;
+        if (options->lax)
+            document.ParseStream<kParseStopWhenDoneFlag | kParseFullPrecisionFlag | kParseCommentsFlag | kParseTrailingCommasFlag>(stream);
+        else
+            document.ParseStream<kParseStopWhenDoneFlag | kParseFullPrecisionFlag>(stream);
+
+        if (document.HasParseError()) {
+            fprintf(stderr, "%s: error parsing JSON at offset %i:\n    %s\n", options->command,
+                    (int)document.GetErrorOffset(), GetParseError_En(document.GetParseError()));
+            mpack_writer_destroy(&writer);
+            free(data);
+            return false;
+        }
+
+        write_value(options, document, &writer);
+    }
+
+    mpack_error_t error = mpack_writer_destroy(&writer);
+    if (error != mpack_ok) {
+        fprintf(stderr, "%s: error writing MessagePack: %s (%i)\n", options->command,
+                mpack_error_to_string(error), (int)error);
         free(data);
         return false;
     }
 
-    bool error = output(options, document);
     free(data);
-    return error;
+    return true;
 }
 
 static void parse_min_bytes(options_t* options) {
