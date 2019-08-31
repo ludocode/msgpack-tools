@@ -316,8 +316,8 @@ static void usage(const char* command) {
     fprintf(stderr, "    -p  Output pretty-printed JSON\n");
     fprintf(stderr, "    -b  Convert bin to base64 string with \"base64:\" prefix\n");
     fprintf(stderr, "    -B  Convert bin to base64 string with no prefix\n");
-    fprintf(stderr, "    -c  Continuous mode, no delimiter");
-    fprintf(stderr, "    -C  Continuous mode, comma delimited");
+    fprintf(stderr, "    -c  Continuous mode, no delimiter\n");
+    fprintf(stderr, "    -C  Continuous mode, comma delimited\n");
     fprintf(stderr, "    -h  Print this help\n");
     fprintf(stderr, "    -v  Print version information\n");
     fprintf(stderr, "For viewing MessagePack, you probably want -d or -di <filename>.\n");
