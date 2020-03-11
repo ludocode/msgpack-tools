@@ -33,6 +33,9 @@
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/writer.h"
 
+#define HEX_PREFIX_BYTE_COUNT 8
+#define BIN_EXT_DESCRIPTION_LENGTH 64
+
 using namespace rapidjson;
 
 typedef enum continuous_mode_t {
@@ -148,6 +151,70 @@ static bool base64_ext(mpack_reader_t* reader, WriterType& writer, options_t* op
     return ret;
 }
 
+static char hex_char(uint8_t value) {
+    return (value < 10) ? ('0' + value) : ('A' + (value - 10));
+}
+
+static void append_hex_prefix(mpack_reader_t* reader, uint32_t length, char* buf, size_t size) {
+    // need room for a space, a null-terminator, a closing brace, and ellipses.
+    // there's no reason the buffer should be too small but we check for safety
+    // anyway.
+    if (size == 0)
+        abort();
+    if (size < 6) {
+        buf[0] = '\0';
+        return;
+    }
+
+    // if there's no data, we close right away.
+    if (length == 0) {
+        strcpy(buf, ">");
+        return;
+    }
+
+    // otherwise we add an opening space
+    *buf++ = ' ';
+
+    // read the prefix
+    uint32_t prefix_length = (length > HEX_PREFIX_BYTE_COUNT) ? HEX_PREFIX_BYTE_COUNT : length;
+    char prefix[HEX_PREFIX_BYTE_COUNT * 2];
+    mpack_read_bytes(reader, prefix, prefix_length);
+
+    // append it to the string
+    for (uint32_t i = 0; i < prefix_length; ++i) {
+        // need enough room for two hex digits plus the five closing digits
+        if (size < 7)
+            break;
+        uint8_t b = (uint8_t)prefix[i];
+        *buf++ = hex_char((b >> 4) & 0xf);
+        *buf++ = hex_char(b & 0xf);
+    }
+
+    // close the element
+    if (length - prefix_length > 0) {
+        *buf++ = '.';
+        *buf++ = '.';
+        *buf++ = '.';
+    }
+    *buf++ = '>';
+    *buf++ = '\0';
+
+    // skip the rest of the bin/ext
+    mpack_skip_bytes(reader, length - prefix_length);
+}
+
+static void describe_bin(mpack_reader_t* reader, uint32_t length, char* buf, size_t buf_size) {
+    snprintf(buf, buf_size, "<bin size:%u", length);
+    append_hex_prefix(reader, length, buf + strlen(buf), buf_size - strlen(buf));
+    mpack_done_bin(reader);
+}
+
+static void describe_ext(mpack_reader_t* reader, int8_t exttype, uint32_t length, char* buf, size_t buf_size) {
+    snprintf(buf, buf_size, "<ext type:%i size:%u", exttype, length);
+    append_hex_prefix(reader, length, buf + strlen(buf), buf_size - strlen(buf));
+    mpack_done_ext(reader);
+}
+
 template <class WriterType>
 static bool element(mpack_reader_t* reader, WriterType& writer, options_t* options) {
     const mpack_tag_t tag = mpack_read_tag(reader);
@@ -169,13 +236,14 @@ static bool element(mpack_reader_t* reader, WriterType& writer, options_t* optio
             if (options->base64) {
                 return base64_bin(reader, writer, options, tag.v.l, options->base64_prefix);
             } else if (options->debug) {
-                mpack_skip_bytes(reader, tag.v.l);
-                mpack_done_bin(reader);
-                char buf[64];
-                snprintf(buf, sizeof(buf), "<bin of size %u>", tag.v.l);
+                char buf[BIN_EXT_DESCRIPTION_LENGTH];
+                describe_bin(reader, tag.v.l, buf, sizeof(buf));
                 return writer.RawValue(buf, strlen(buf), kStringType);
             } else {
-                fprintf(stderr, "%s: bin unencodable in JSON. Try debug viewing mode (-d)\n", options->command);
+                fprintf(stderr,
+                        "%s: bin unencodable in JSON. Try debug viewing mode (-d) or base64 mode (-b or -B).\n",
+                        options->command);
+                mpack_reader_flag_error(reader, mpack_error_data);
                 return false;
             }
 
@@ -183,13 +251,14 @@ static bool element(mpack_reader_t* reader, WriterType& writer, options_t* optio
             if (options->base64) {
                 return base64_ext(reader, writer, options, tag.exttype, tag.v.l);
             } else if (options->debug) {
-                mpack_skip_bytes(reader, tag.v.l);
-                mpack_done_ext(reader);
-                char buf[64];
-                snprintf(buf, sizeof(buf), "<ext of type %i size %u>", tag.exttype, tag.v.l);
+                char buf[BIN_EXT_DESCRIPTION_LENGTH];
+                describe_ext(reader, tag.exttype, tag.v.l, buf, sizeof(buf));
                 return writer.RawValue(buf, strlen(buf), kStringType);
             } else {
-                fprintf(stderr, "%s: ext type %i unencodable in JSON. Try debug viewing mode (-d)\n", options->command, tag.exttype);
+                fprintf(stderr,
+                        "%s: ext type %i unencodable in JSON. Try debug viewing mode (-d) or base64 mode (-b or -B)\n",
+                        options->command, tag.exttype);
+                mpack_reader_flag_error(reader, mpack_error_data);
                 return false;
             }
 

@@ -198,17 +198,18 @@ add_test("msgpack2json-basic-min"             ${COMPARE} ${TESTS_DIR}/basic-min.
 add_test("msgpack2json-basic"                 ${COMPARE} ${TESTS_DIR}/basic.json                   ${VALGRIND} ./msgpack2json -pi ${TESTS_DIR}/basic.mp)
 add_test("msgpack2json-basic-debug"           ${COMPARE} ${TESTS_DIR}/basic.json                   ${VALGRIND} ./msgpack2json -di ${TESTS_DIR}/basic.mp)
 add_test("msgpack2json-stdin"                 ${COMPARE} ${TESTS_DIR}/basic.json                   bash -c "cat ${TESTS_DIR}/basic.mp | ${VALGRIND} ./msgpack2json -p")
+add_test("msgpack2json-bin-ext-debug"         ${COMPARE} ${TESTS_DIR}/bin-ext-debug.txt           ${VALGRIND} ./msgpack2json -di ${TESTS_DIR}/base64-bin-ext.mp)
 
 add_test("json2msgpack-base64-str-prefix"     ${COMPARE} ${TESTS_DIR}/base64-str-prefix.mp         ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/base64-prefix.json)
 add_test("json2msgpack-base64-bin"            ${COMPARE} ${TESTS_DIR}/base64-bin-ext.mp            ${VALGRIND} ./json2msgpack -bi ${TESTS_DIR}/base64-prefix.json)
 add_test("json2msgpack-base64-bin-lax"        ${COMPARE} ${TESTS_DIR}/base64-bin-ext.mp            ${VALGRIND} ./json2msgpack -bli ${TESTS_DIR}/base64-prefix-lax.json)
 
+add_test("json2msgpack-base64-no-detect-str"  ${COMPARE} ${TESTS_DIR}/base64-str.mp                ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/base64-detect.json)
 add_test("json2msgpack-base64-detect-str"     ${COMPARE} ${TESTS_DIR}/base64-str.mp                ${VALGRIND} ./json2msgpack -B 200 -i ${TESTS_DIR}/base64-detect.json)
 add_test("json2msgpack-base64-detect-partial" ${COMPARE} ${TESTS_DIR}/base64-partial.mp            ${VALGRIND} ./json2msgpack -B 50 -i ${TESTS_DIR}/base64-detect.json)
-add_test("json2msgpack-base64-detect-bin"     ${COMPARE} ${TESTS_DIR}/base64-bin.mp                ${VALGRIND} ./json2msgpack -B 22 -i ${TESTS_DIR}/base64-detect.json)
-add_test("json2msgpack-base64-detect-bin-one" ${COMPARE} ${TESTS_DIR}/base64-bin.mp                ${VALGRIND} ./json2msgpack -B 1 -i ${TESTS_DIR}/base64-detect.json)
+add_test("json2msgpack-base64-detect-most"    ${COMPARE} ${TESTS_DIR}/base64-most.mp               ${VALGRIND} ./json2msgpack -B 22 -i ${TESTS_DIR}/base64-detect.json)
 
-add_test("json2msgpack-base64-mixed-partial"  ${COMPARE} ${TESTS_DIR}/base64-partial-ext.mp        ${VALGRIND} ./json2msgpack -bB 50 -i ${TESTS_DIR}/base64-mixed.json)
+add_test("json2msgpack-base64-mixed-partial"  ${COMPARE} ${TESTS_DIR}/base64-mixed-partial.mp      ${VALGRIND} ./json2msgpack -bB 50 -i ${TESTS_DIR}/base64-mixed.json)
 add_test("json2msgpack-base64-mixed-bin"      ${COMPARE} ${TESTS_DIR}/base64-bin-ext.mp            ${VALGRIND} ./json2msgpack -bB 22 -i ${TESTS_DIR}/base64-mixed.json)
 
 add_test("json2msgpack-value-string"          ${COMPARE} ${TESTS_DIR}/value-string.mp              ${VALGRIND} ./json2msgpack -i ${TESTS_DIR}/value-string.json)

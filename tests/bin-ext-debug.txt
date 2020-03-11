@@ -1,0 +1,9 @@
+{
+    "string": "The quick brown fox jumps over the lazy dog",
+    "empty": <bin size:0>,
+    "short": <bin size:1 2E>,
+    "md5": <bin size:16 9E107D9D372BB682...>,
+    "sha512": <bin size:64 07E547D9586F6A73...>,
+    "ext 127 md5": <ext type:127 size:16 9E107D9D372BB682...>,
+    "ext -128 sha512": <ext type:-128 size:64 07E547D9586F6A73...>
+}

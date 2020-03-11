@@ -1,5 +1,7 @@
 {
     "string": "The quick brown fox jumps over the lazy dog",
+    "empty": "base64:",
+    "short": "base64:Lg==",
 
     // echo -n 'The quick brown fox jumps over the lazy dog' | md5sum | perl -ne 's/([0-9a-f]{2})/print chr hex $1/gie' | base64
     "md5": "base64:nhB9nTcrtoJr2B01QqQZ1g==",
