@@ -23,6 +23,7 @@
  */
 
 #include "common.h"
+#include <ctype.h>
 #include <errno.h>
 #include "rapidjson/document.h"
 
