@@ -1,0 +1,81 @@
+.TH json2msgpack 1
+.SH NAME
+.PP
+json2msgpack \- convert JSON to MessagePack
+.SH SYNOPSIS
+.PP
+\fB\fCjson2msgpack\fR [\fB\fC\-lfb\fR] [\fB\fC\-B\fR \fImin\-bytes\fP] [\fB\fC\-i\fR \fIin\-file\fP] [\fB\fC\-o\fR \fIout\-file\fP]
+.SH DESCRIPTION
+.PP
+\fB\fCjson2msgpack\fR converts a JSON object to MessagePack. It has options for lax parsing and base64 conversions.
+.PP
+The JSON input is expected to be valid UTF\-8. Strings in the resulting MessagePack will be encoded in UTF\-8.
+.SH OPTIONS
+.TP
+\fB\fC\-i\fR \fIin\-file\fP
+Read from the given file instead of standard input.
+.TP
+\fB\fC\-o\fR \fIout\-file\fP
+Write to the given file instead of standard output.
+.TP
+\fB\fC\-l\fR
+Lax parsing mode. The JSON parser will be more forgiving to invalid JSON. This means:
+.RS
+.IP \(bu 2
+Comments are allowed and ignored
+.IP \(bu 2
+Trailing commas in maps and arrays are allowed and ignored
+.RE
+.TP
+\fB\fC\-f\fR
+Convert real numbers to floats instead of doubles.
+.TP
+\fB\fC\-b\fR
+Parse strings with a "\fB\fCbase64:\fR" prefix as base64 and convert them to bin objects.
+.IP
+Base64 strings with an "\fB\fCext:\fR\fI#\fP\fB\fC:base64:\fR" prefix will be converted to ext objects.
+.IP
+If base64 parsing fails for a string prefixed with \fB\fCbase64:\fR or \fB\fCext:\fR, the conversion will abort with error.
+.TP
+\fB\fC\-B\fR \fImin\-bytes\fP
+Try to parse any non\-key string \fImin\-bytes\fP bytes or longer as base64, and if successful, convert it to a bin object. If base64 parsing fails, the string will be left as\-is and written as a UTF\-8 string.
+.IP
+Be careful not to set this too low, since any string without spaces (such UNIX paths) might be coincidentally parseable as base64. Carriage returns and line feeds are allowed and ignored, but spaces are not allowed in order to reduce the risk incorrect detection.
+.IP
+This option does not imply \fB\fC\-b\fR; you may want to specify both.
+.IP
+\fImin\-bytes\fP must be larger than zero.
+.TP
+\fB\fC\-h\fR
+Print usage.
+.SH NOTES
+.PP
+\fB\fCjson2msgpack\fR will preserve the ordering of key\-value pairs in objects/maps, and does not check that keys are unique.
+.SH EXAMPLES
+.PP
+To convert a hand\-written JSON file to a MessagePack file, ignoring comments and trailing commas, and allowing embedded base64 with a "\fB\fCbase64:\fR" prefix:
+.PP
+.RS
+\fB\fCjson2msgpack \-bli\fR \fIfile.json\fP \fB\fC\-o\fR \fIfile.mp\fP
+.RE
+.SH BUGS
+.PP
+Big integers outside of the range [INT64_MIN, UINT64_MAX] are converted to real numbers instead of causing a parse error. They will be output in MessagePack as doubles, or floats if \fB\fC\-f\fR was specified, with associated loss of precision.
+.SH AUTHOR
+.PP
+Nicholas Fraser \[la]https://ludocode.com\[ra]
+.SH SEE ALSO
+.PP
+.BR msgpack2json (1)
+.PP
+msgpack\-tools \[la]https://github.com/ludocode/msgpack-tools\[ra]
+.PP
+JSON \[la]http://json.org/\[ra]
+.PP
+MessagePack \[la]http://msgpack.org/\[ra]
+.PP
+RapidJSON \[la]http://rapidjson.org/\[ra]
+.PP
+MPack \[la]https://github.com/ludocode/mpack\[ra]
+.PP
+libb64 \[la]http://libb64.sourceforge.net/\[ra]

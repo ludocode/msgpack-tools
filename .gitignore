@@ -1,3 +1,5 @@
-build/
-contrib/
-docs/*.1
+/.build/
+/contrib/
+/config.mk
+/msgpack2json
+/json2msgpack

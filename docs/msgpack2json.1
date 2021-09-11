@@ -1,0 +1,101 @@
+.TH msgpack2json 1
+.SH NAME
+.PP
+msgpack2json \- convert MessagePack to JSON
+.SH SYNOPSIS
+.PP
+\fB\fCmsgpack2json\fR [\fB\fC\-lpbB\fR] [\fB\fC\-i\fR \fIin\-file\fP] [\fB\fC\-o\fR \fIout\-file\fP]
+.SH DESCRIPTION
+.PP
+\fB\fCmsgpack2json\fR converts a MessagePack object to JSON. It has options for lax conversions, pretty\-printing, and base64 conversions.
+.PP
+MessagePack strings are expected to be valid UTF\-8. The resulting JSON will be output in UTF\-8.
+.SH OPTIONS
+.TP
+\fB\fC\-i\fR \fIin\-file\fP
+Read from the given file instead of standard input.
+.TP
+\fB\fC\-o\fR \fIout\-file\fP
+Write to the given file instead of standard output.
+.TP
+\fB\fC\-d\fR
+Debugging conversion mode for viewing MessagePack in a human\-readable format. MessagePack objects that cannot be expressed in JSON will be converted to pseudo\-JSON instead of aborting with error. This means:
+.RS
+.IP \(bu 2
+Map keys do not have to be strings
+.IP \(bu 2
+The root node of the input does not have to be a map or array
+.IP \(bu 2
+Bin objects will be printed as \fB\fC<bin of size\fR \fI###\fP\fB\fC>\fR (unless in a base64 mode)
+.IP \(bu 2
+Ext objects will be printed as \fB\fC<ext of type\fR \fI###\fP \fB\fCsize\fR \fI###\fP\fB\fC>\fR (unless in a base64 mode)
+.RE
+.IP
+The resulting output may not be parseable as JSON. This implies \fB\fC\-p\fR\&.
+.TP
+\fB\fC\-p\fR
+Pretty\-print JSON output. UNIX\-style newlines and four space indentation will be used.
+.TP
+\fB\fC\-b\fR
+Convert bin objects to base64 strings with a "\fB\fCbase64:\fR" prefix.
+.IP
+Ext objects will be converted to base64 strings with an "\fB\fCext:\fR\fI#\fP\fB\fC:base64:\fR" prefix.
+.TP
+\fB\fC\-B\fR
+Convert bin objects to base64 strings with no prefix.
+.IP
+Ext objects will be converted to base64 strings with an "\fB\fCext:\fR\fI#\fP\fB\fC:base64:\fR" prefix.
+.TP
+\fB\fC\-c\fR
+Continuous mode. The input can contain any number of top\-level objects instead of just one. Each object is output as JSON with no delimiter (other than a newline in pretty\-printing mode.)
+.TP
+\fB\fC\-C\fR
+Continuous mode, delimited by commas. The input can contain any number of top\-level objects instead of just one. Each object is output as JSON, delimited by commas (and a newline in pretty\-printing mode.) This can be used to construct a JSON array containing all input objects by wrapping it in square brackets.
+.TP
+\fB\fC\-h\fR
+Print usage.
+.SH NOTES
+.PP
+If both \fB\fC\-b\fR and \fB\fC\-B\fR options are given, only the last one specified will take effect.
+.PP
+\fB\fCmsgpack2json\fR will preserve the ordering of key\-value pairs in objects/maps, and does not check that keys are unique.
+.SH EXAMPLES
+.PP
+To view a MessagePack file in a human\-readable format:
+.PP
+.RS
+\fB\fCmsgpack2json \-di\fR \fIfile.mp\fP
+.RE
+.PP
+To convert a MessagePack file to a JSON file using base64 for embedded binary data:
+.PP
+.RS
+\fB\fCmsgpack2json \-Bi\fR \fIfile.mp\fP \fB\fC\-o\fR \fIfile.json\fP
+.RE
+.PP
+To fetch MessagePack from a web API and view it in a human\-readable format:
+.PP
+.RS
+\fB\fCcurl\fR \fIht\fP\fItp://example/url\fP \fB\fC| msgpack2json \-d\fR
+.RE
+.SH BUGS
+.PP
+\fB\fCmsgpack2json\fR currently truncates strings that contain NUL bytes.
+.SH AUTHOR
+.PP
+Nicholas Fraser \[la]https://ludocode.com\[ra]
+.SH SEE ALSO
+.PP
+.BR json2msgpack (1)
+.PP
+msgpack\-tools \[la]https://github.com/ludocode/msgpack-tools\[ra]
+.PP
+MessagePack \[la]http://msgpack.org/\[ra]
+.PP
+JSON \[la]http://json.org/\[ra]
+.PP
+MPack \[la]https://github.com/ludocode/mpack\[ra]
+.PP
+RapidJSON \[la]http://rapidjson.org/\[ra]
+.PP
+libb64 \[la]http://libb64.sourceforge.net/\[ra]

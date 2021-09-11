@@ -25,7 +25,6 @@
 #include "common.h"
 #include <ctype.h>
 #include <errno.h>
-#include "rapidjson/document.h"
 
 using namespace rapidjson;
 
@@ -357,7 +356,7 @@ static void usage(const char* command) {
 }
 
 static void version(const char* command) {
-    fprintf(stderr, "%s version %s -- %s\n", command, VERSION, "https://github.com/ludocode/msgpack2json");
+    fprintf(stderr, "%s version %s -- %s\n", command, VERSION, "https://github.com/ludocode/msgpack-tools");
     fprintf(stderr, "RapidJSON version %s -- %s\n", RAPIDJSON_VERSION_STRING, "http://rapidjson.org/");
     fprintf(stderr, "MPack version %s -- %s\n", MPACK_VERSION_STRING, "https://github.com/ludocode/mpack");
     fprintf(stderr, "libb64 version %s -- %s\n", LIBB64_VERSION, "http://libb64.sourceforge.net/");

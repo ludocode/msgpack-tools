@@ -1,3 +1,9 @@
+msgpack-tools v1.0
+------------------
+
+- Replaced CMake with a new simplified buildsystem
+- [md2man](https://github.com/sunaku/md2man) is no longer required when building from the source repository
+
 msgpack-tools v0.6
 ------------------
 

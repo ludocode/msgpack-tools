@@ -66,8 +66,6 @@ If both `-b` and `-B` options are given, only the last one specified will take e
 
 `msgpack2json` will preserve the ordering of key-value pairs in objects/maps, and does not check that keys are unique.
 
-`msgpack2json` is under construction.
-
 EXAMPLES
 --------
 
@@ -91,12 +89,7 @@ BUGS
 AUTHOR
 ------
 
-Nicholas Fraser <https://github.com/ludocode>
-
-VERSION
--------
-
-$version
+Nicholas Fraser <https://ludocode.com>
 
 SEE ALSO
 --------

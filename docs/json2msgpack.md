@@ -75,12 +75,7 @@ Big integers outside of the range \[INT64\_MIN, UINT64\_MAX\] are converted to r
 AUTHOR
 ------
 
-Nicholas Fraser <https://github.com/ludocode>
-
-VERSION
--------
-
-$version
+Nicholas Fraser <https://ludocode.com>
 
 SEE ALSO
 --------

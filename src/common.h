@@ -30,14 +30,58 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "mpack/mpack.h"
 #include "rapidjson/error/en.h"
 
-// libb64 doesn't have extern "C" around its C headers
-extern "C" {
-#include "b64/cdecode.h"
-#include "b64/cencode.h"
-}
+// We include the source for our dependencies directly, silencing whatever
+// warnings are necessary. This greatly simplifies the build process.
+
+#pragma GCC diagnostic push
+
+    // clang and gcc both warn about unrecognized warning options, but use
+    // different means to silence them.
+    #ifdef __clang__
+        #pragma GCC diagnostic ignored "-Wunknown-warning-option"
+    #else
+        #pragma GCC diagnostic ignored "-Wpragmas"
+    #endif
+
+    #pragma GCC diagnostic push
+        // mpack uses empty variadic macros.
+        #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+
+        // mpack may or may not be amalgamated.
+        #define MPACK_INTERNAL 1
+        #define MPACK_EMIT_INLINE_DEFS 1
+        #include "mpack/mpack.h"
+        #if MPACK_AMALGAMATED
+            #include "mpack/mpack.c"
+        #else
+            #include "mpack/mpack-platform.c"
+            #include "mpack/mpack-common.c"
+            #include "mpack/mpack-expect.c"
+            #include "mpack/mpack-node.c"
+            #include "mpack/mpack-reader.c"
+            #include "mpack/mpack-writer.c"
+        #endif
+    #pragma GCC diagnostic pop
+
+    #pragma GCC diagnostic push
+        // libb64 has switch case fallthroughs.
+        #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+        #include "cdecode.c"
+        #include "cencode.c"
+    #pragma GCC diagnostic pop
+
+    #include "rapidjson/filewritestream.h"
+    #include "rapidjson/prettywriter.h"
+    #include "rapidjson/writer.h"
+    #pragma GCC diagnostic push
+        // rapidjson copies classes with memcpy.
+        #pragma GCC diagnostic ignored "-Wclass-memaccess"
+        #include "rapidjson/document.h"
+    #pragma GCC diagnostic pop
+
+#pragma GCC diagnostic pop
 
 #define BUFFER_SIZE 65536
 
